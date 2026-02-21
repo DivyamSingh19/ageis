@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -13,48 +7,82 @@ datasource db {
   provider = "postgresql"
 }
 
+enum DeliveryStatus {
+  Initialized
+  Intransit
+  OutForDelivery
+  Delivered
+}
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  passwordHash  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  profile   UserProfile?
+  profile UserProfile?
 }
 
 model Farmer {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  passwordHash  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  profile   FarmerProfile?
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  profile      FarmerProfile?
+  products     Products[]
 }
-
-
 
 model UserProfile {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  bio       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  bio            String?
+  address_line_1 String
+  address_line_2 String
+  address_line_3 String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
-
 model FarmerProfile {
-  id        String   @id @default(uuid())
-  farmerId  String   @unique
-  bio       String?
+  id         String   @id @default(uuid())
+  farmerId   String   @unique
+  bio        String?
+  location   String
   trustScore Float    @default(0)
   rating     Float    @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  farmer     Farmer   @relation(fields: [farmerId], references: [id])
+}
+
+model Products {
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  farmer    Farmer   @relation(fields: [farmerId], references: [id])
+  farnerId  String
+  farner    Farmer   @relation(fields: [farnerId], references: [id])
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderNFC {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderNFT {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
