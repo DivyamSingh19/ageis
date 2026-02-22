@@ -1,6 +1,15 @@
 import { Request,Response } from "express"
+import prisma from "@repo/db"
+import { ProductService } from "../../services/products/main"
+
+
+
 export class ProductController {
-  create = async (req:Request,res:Response) => {
+    private productService:ProductService
+    constructor(){
+        this.productService = new ProductService()
+    }
+  add = async (req:Request,res:Response) => {
     try {
         
     } catch (error) {
