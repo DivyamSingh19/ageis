@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "user",
-    "slug": "user",
+    "name": "sample",
+    "slug": "sample",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "user",
+    "scheme": "sample",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
