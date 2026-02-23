@@ -77,7 +77,9 @@ model DeliveryAgent {
 
 model DeliveryAgentProfile {
   id           String @id @default(uuid())
-  
+  phoneNumber  String
+  orderCount    Int    @default(0)
+  rating        Float  @default(0)
   agentId      String @unique
   agent        DeliveryAgent  @relation(fields: [agentId],references: [id])
   createdAt    DateTime @default(now())
