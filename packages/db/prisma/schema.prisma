@@ -61,6 +61,19 @@ model FarmerProfile {
   farmer     Farmer   @relation(fields: [farmerId], references: [id])
 }
 
+model DeliveryAgent{
+  id String @id @default(uuid())
+  email String @unique
+  passwordHash String
+  
+}
+model DeliveryAgentProfile{
+  id  String @id @default(uuid())
+}
+model Admin{
+  id String @id @default(uuid())
+}
+
 model Products {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
@@ -85,4 +98,15 @@ model OrderNFT {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+
+  @@index([id])
+}
+
+
+model Delivery{
+  id String @id @default(uuid())
+
+
+  @@index([id])
 }
