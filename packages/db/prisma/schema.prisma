@@ -22,6 +22,7 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  keys    UserKeys?
   profile UserProfile?
 }
 
@@ -32,20 +33,21 @@ model Farmer {
   passwordHash String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  keys         FarmerKeys?
   profile      FarmerProfile?
   products     Products[]
 }
 
 model UserProfile {
-  id             String   @id @default(uuid())
-  userId         String   @unique
-  bio            String?
-  addressLine01  String
-  addressLine02  String
-  phoneNumber    String 
-  postalCode     String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  bio           String?
+  addressLine01 String
+  addressLine02 String
+  phoneNumber   String
+  postalCode    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -65,25 +67,23 @@ model FarmerProfile {
 model DeliveryAgent {
   id           String   @id @default(uuid())
   email        String   @unique
-  passwordHash String   
+  passwordHash String
   name         String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-
-
-  profile     DeliveryAgentProfile?
+  profile DeliveryAgentProfile?
 }
 
 model DeliveryAgentProfile {
-  id           String @id @default(uuid())
-  phoneNumber  String
-  orderCount    Int    @default(0)
-  rating        Float  @default(0)
-  agentId      String @unique
-  agent        DeliveryAgent  @relation(fields: [agentId],references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String        @id @default(uuid())
+  phoneNumber String
+  orderCount  Int           @default(0)
+  rating      Float         @default(0)
+  agentId     String        @unique
+  agent       DeliveryAgent @relation(fields: [agentId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Admin {
@@ -99,9 +99,9 @@ model Products {
 }
 
 model Order {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   delivery  Delivery?
 }
 
@@ -120,10 +120,38 @@ model OrderNFT {
 }
 
 model Delivery {
-  id String @id @default(uuid())
-  orderId  String @unique
-  order    Order @relation(fields: [orderId],references: [id])
-  agentId  String @unique
-  
+  id      String @id @default(uuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+  agentId String @unique
+
   @@index([id])
 }
+
+model UserKeys {
+  id                  String   @id @default(uuid()) @map("key_id")
+  publicKey           String   @unique @map("public_key")
+  encryptedPrivateKey String   @map("encrypted_private_key")
+  meta                Json // { iv, salt, scheme }
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  userId              String   @unique @map("user_id")
+  user                User     @relation(fields: [userId], references: [id])
+
+  @@map("keys")
+}
+
+model FarmerKeys {
+  id                  String   @id @default(uuid()) @map("key_id")
+  publicKey           String   @unique @map("public_key")
+  encryptedPrivateKey String   @map("encrypted_private_key")
+  meta                Json // { iv, salt, scheme }
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  farmerId            String   @unique @map("farmer_id")
+  farmer              Farmer   @relation(fields: [farmerId], references: [id])
+
+  @@map("farmer_keys")
+}
+
+
