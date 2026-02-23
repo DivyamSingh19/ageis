@@ -12,7 +12,9 @@ declare global{
     namespace Express{
         interface Request{
             userId?:string,
-            farmerId?:string
+            farmerId?:string,
+            adminId?:string,
+            deliveryAgentId?:string
         }
     }
 }
