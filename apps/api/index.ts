@@ -5,13 +5,13 @@ import {router as adminAuthRouter} from "./routes/admin/auth"
 import {router as deliveryAuthRouter} from "./routes/delivery/auth"   
 import {router as farmerAuthRouter} from "./routes/farmer/auth.routes"
 import {router as userAuthRouter} from "./routes/user/auth"
+import keyRouter from "./blockchain/routes/key.routes"
 const app = express()
 const port = 4000
 
-
 dotenv.config()
 app.use(express.json())
-
+app.use(cors())
 declare global{
     namespace Express{
         interface Request{
@@ -38,7 +38,7 @@ app.get("/",async (req:Request,res:Response) => {
 //admin routes
 app.use("/api/admin/auth",adminAuthRouter)
 
-
+ 
 
 
 
@@ -63,9 +63,9 @@ app.use("/api/farmer/auth",farmerAuthRouter)
 
 
 //user routes
-app.use("/api/consumer/auth",userAuthRouter)
+app.use("/api/user/auth",userAuthRouter)
 
-
+app.use("/api/user/keys",keyRouter)
 
 
 

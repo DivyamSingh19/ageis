@@ -1,21 +1,21 @@
 import { Router } from "express";
 import { KeyController } from "../controllers/key.controller";
 
-const router = Router();
+const keyRouter = Router();
 const keyController = new KeyController();
 
  
-router.post("/new", keyController.createKeyPair);
+keyRouter.post("/new", keyController.createKeyPair);
 
  
-router.get("/:publicKey", keyController.getKeys);
+keyRouter.get("/:publicKey", keyController.getKeys);
 
  
-router.get("/:publicKey/public", keyController.getPublicKey);
+keyRouter.get("/:publicKey/public", keyController.getPublicKey);
 
  
-router.put("/:publicKey/rotate", keyController.rotateKeys);
+keyRouter.put("/:publicKey/rotate", keyController.rotateKeys);
 
-router.delete("/:publicKey", keyController.deleteKeys);
+keyRouter.delete("/:publicKey", keyController.deleteKeys);
 
-export default router;
+export default keyRouter;
