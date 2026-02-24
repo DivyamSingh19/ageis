@@ -158,20 +158,6 @@ export default function SignUpScreen() {
           {/* Title */}
           <Text style={styles.title}>Sign Up</Text>
 
-          {/* Social buttons */}
-          <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.75}>
-              {/* Google "G" */}
-              <Text style={styles.socialBtnIcon}>G</Text>
-              <Text style={styles.socialBtnText}>Google</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.75}>
-              {/* MetaMask fox emoji stand-in */}
-              <Text style={styles.socialBtnIcon}>🦊</Text>
-              <Text style={styles.socialBtnText}>Metamask</Text>
-            </TouchableOpacity>
-          </View>
 
           {/* Divider */}
           <View style={styles.dividerRow}>

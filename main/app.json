@@ -20,7 +20,10 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.main"
+      "package": "com.anonymous.main",
+      "permissions": [
+        "android.permission.NFC"
+      ]
     },
     "web": {
       "output": "static",
@@ -39,11 +42,23 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "Allow scanning NFC tags"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "901ceea4-8c66-469a-8692-515fa75cbc50"
+      }
     }
   }
 }
