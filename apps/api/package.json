@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "dev":"tsc -b && node dist/index.js",
-     "build":"tsc -b"
+    "dev": "tsc -b && node dist/index.js",
+    "build": "tsc -b"
   },
   "devDependencies": {
     "@repo/db": "*",
@@ -19,6 +19,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@solana/web3.js": "^1.98.4",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
