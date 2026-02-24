@@ -1,98 +1,471 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Animated,
+  StatusBar,
+  Dimensions,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const { width } = Dimensions.get("window");
 
-export default function HomeScreen() {
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface InputFieldProps {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  secureTextEntry?: boolean;
+  keyboardType?: "default" | "email-address";
+  hint?: string;
+}
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  secureTextEntry = false,
+  keyboardType = "default",
+  hint,
+}) => {
+  const [focused, setFocused] = useState(false);
+  const borderAnim = useRef(new Animated.Value(0)).current;
+
+  const handleFocus = () => {
+    setFocused(true);
+    Animated.timing(borderAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    Animated.timing(borderAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const borderColor = borderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#2a2a2a", "#39FF14"],
+  });
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.fieldWrapper}>
+      <Text style={styles.label}>{label}</Text>
+      <Animated.View style={[styles.inputContainer, { borderColor }]}>
+        <TextInput
+          style={styles.input}
+          placeholder={placeholder}
+          placeholderTextColor="#555"
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={secureTextEntry}
+          keyboardType={keyboardType}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          autoCapitalize="none"
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+      </Animated.View>
+      {hint && <Text style={styles.hint}>{hint}</Text>}
+    </View>
+  );
+};
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+// ─── Logo Mark ───────────────────────────────────────────────────────────────
+
+const LogoMark: React.FC = () => (
+  <View style={styles.logoContainer}>
+    {/* Stylised "A" lettermark */}
+    <View style={styles.logoMark}>
+      <View style={styles.logoLeftLeg} />
+      <View style={styles.logoRightLeg} />
+      <View style={styles.logoCrossbar} />
+    </View>
+  </View>
+);
+
+// ─── Main Screen ─────────────────────────────────────────────────────────────
+
+export default function SignUpScreen() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const buttonScale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(buttonScale, {
+      toValue: 0.96,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(buttonScale, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleSignUp = () => {
+    console.log({ firstName, lastName, email, password });
+  };
+
+  return (
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Background gradient */}
+      <LinearGradient
+        colors={["#0d1a0d", "#0a0a0a", "#001a00"]}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Ambient glow blob */}
+      <View style={styles.glowBlob} pointerEvents="none" />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Logo */}
+          <LogoMark />
+
+          {/* Title */}
+          <Text style={styles.title}>Sign Up</Text>
+
+          {/* Social buttons */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.75}>
+              {/* Google "G" */}
+              <Text style={styles.socialBtnIcon}>G</Text>
+              <Text style={styles.socialBtnText}>Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.75}>
+              {/* MetaMask fox emoji stand-in */}
+              <Text style={styles.socialBtnIcon}>🦊</Text>
+              <Text style={styles.socialBtnText}>Metamask</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Divider */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Form fields */}
+          <InputField
+            label="First Name"
+            placeholder="eg. Jane"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <InputField
+            label="Last Name"
+            placeholder="eg. Doe"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <InputField
+            label="Email"
+            placeholder="eg. janedoe@gmail.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
+          <InputField
+            label="Password"
+            placeholder="eg. janedoe@gmail.com"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            hint="Must be at least 8 characters"
+          />
+
+          {/* CTA button */}
+          <Animated.View
+            style={[
+              styles.ctaWrapper,
+              { transform: [{ scale: buttonScale }] },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.ctaBtn}
+              activeOpacity={0.9}
+              onPress={handleSignUp}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+            >
+              <LinearGradient
+                colors={["#39FF14", "#28cc0d"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.ctaGradient}
+              >
+                <Text style={styles.ctaText}>Sign Up</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Login redirect */}
+          <View style={styles.loginRow}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity>
+              <Text style={styles.loginLink}>Log in</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  root: {
+    flex: 1,
+    backgroundColor: "#0a0a0a",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  glowBlob: {
+    position: "absolute",
+    top: -80,
+    alignSelf: "center",
+    width: 340,
+    height: 340,
+    borderRadius: 170,
+    backgroundColor: "#004d00",
+    opacity: 0.35,
+    // React Native doesn't support CSS blur, but the green tint
+    // creates the ambient glow effect.
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
+
+  scroll: {
+    flexGrow: 1,
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 64,
+    paddingBottom: 40,
+  },
+
+  // ── Logo ────────────────────────────────────────────────────────────────
+
+  logoContainer: {
+    marginBottom: 16,
+    alignItems: "center",
+  },
+
+  logoMark: {
+    width: 44,
+    height: 44,
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+
+  logoLeftLeg: {
+    position: "absolute",
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    width: 4,
+    height: 36,
+    backgroundColor: "#fff",
+    borderRadius: 2,
+    transform: [{ rotate: "20deg" }, { translateX: 8 }],
+  },
+
+  logoRightLeg: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 4,
+    height: 36,
+    backgroundColor: "#fff",
+    borderRadius: 2,
+    transform: [{ rotate: "-20deg" }, { translateX: -8 }],
+  },
+
+  logoCrossbar: {
+    position: "absolute",
+    top: 18,
+    width: 20,
+    height: 3,
+    backgroundColor: "#fff",
+    borderRadius: 2,
+  },
+
+  // ── Title ───────────────────────────────────────────────────────────────
+
+  title: {
+    fontSize: 30,
+    fontWeight: "700",
+    color: "#39FF14",
+    marginBottom: 24,
+    letterSpacing: 0.5,
+  },
+
+  // ── Social ──────────────────────────────────────────────────────────────
+
+  socialRow: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+    marginBottom: 20,
+  },
+
+  socialBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#181818",
+    borderWidth: 1,
+    borderColor: "#2e2e2e",
+    borderRadius: 10,
+    paddingVertical: 12,
+  },
+
+  socialBtnIcon: {
+    fontSize: 15,
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  socialBtnText: {
+    fontSize: 14,
+    color: "#e0e0e0",
+    fontWeight: "500",
+  },
+
+  // ── Divider ─────────────────────────────────────────────────────────────
+
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+    gap: 10,
+  },
+
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#2a2a2a",
+  },
+
+  dividerText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "400",
+  },
+
+  // ── Fields ──────────────────────────────────────────────────────────────
+
+  fieldWrapper: {
+    width: "100%",
+    marginBottom: 14,
+  },
+
+  label: {
+    fontSize: 13,
+    color: "#c0c0c0",
+    fontWeight: "500",
+    marginBottom: 6,
+  },
+
+  inputContainer: {
+    borderWidth: 1.5,
+    borderRadius: 10,
+    backgroundColor: "#131313",
+    overflow: "hidden",
+  },
+
+  input: {
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    fontSize: 14,
+    color: "#fff",
+  },
+
+  hint: {
+    fontSize: 11,
+    color: "#555",
+    marginTop: 5,
+  },
+
+  // ── CTA ─────────────────────────────────────────────────────────────────
+
+  ctaWrapper: {
+    width: "100%",
+    marginTop: 8,
+    marginBottom: 16,
+    borderRadius: 50,
+    overflow: "hidden",
+  },
+
+  ctaBtn: {
+    borderRadius: 50,
+    overflow: "hidden",
+  },
+
+  ctaGradient: {
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 50,
+  },
+
+  ctaText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+    letterSpacing: 0.3,
+  },
+
+  // ── Login redirect ───────────────────────────────────────────────────────
+
+  loginRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  loginText: {
+    fontSize: 13,
+    color: "#666",
+  },
+
+  loginLink: {
+    fontSize: 13,
+    color: "#fff",
+    fontWeight: "700",
   },
 });
