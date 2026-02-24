@@ -199,12 +199,14 @@ exports.Prisma.OrderScalarFieldEnum = {
 
 exports.Prisma.OrderNFCScalarFieldEnum = {
   id: 'id',
+  nfcId: 'nfcId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
 exports.Prisma.OrderNFTScalarFieldEnum = {
   id: 'id',
+  tokenId: 'tokenId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

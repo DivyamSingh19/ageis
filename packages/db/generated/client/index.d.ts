@@ -10902,6 +10902,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     delivery?: boolean | Order$deliveryArgs<ExtArgs>
+    nfc?: boolean | Order$nfcArgs<ExtArgs>
+    nft?: boolean | Order$nftArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
   export type OrderSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10925,6 +10927,8 @@ export namespace Prisma {
   export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     delivery?: boolean | Order$deliveryArgs<ExtArgs>
+    nfc?: boolean | Order$nfcArgs<ExtArgs>
+    nft?: boolean | Order$nftArgs<ExtArgs>
   }
   export type OrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
   export type OrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -10933,6 +10937,8 @@ export namespace Prisma {
     name: "Order"
     objects: {
       delivery: Prisma.$DeliveryPayload<ExtArgs> | null
+      nfc: Prisma.$OrderNFCPayload<ExtArgs> | null
+      nft: Prisma.$OrderNFTPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11333,6 +11339,8 @@ export namespace Prisma {
   export interface Prisma__OrderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     delivery<T extends Order$deliveryArgs<ExtArgs> = {}>(args?: Subset<T, Order$deliveryArgs<ExtArgs>>): Prisma__DeliveryClient<$Result.GetResult<Prisma.$DeliveryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    nfc<T extends Order$nfcArgs<ExtArgs> = {}>(args?: Subset<T, Order$nfcArgs<ExtArgs>>): Prisma__OrderNFCClient<$Result.GetResult<Prisma.$OrderNFCPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    nft<T extends Order$nftArgs<ExtArgs> = {}>(args?: Subset<T, Order$nftArgs<ExtArgs>>): Prisma__OrderNFTClient<$Result.GetResult<Prisma.$OrderNFTPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11772,6 +11780,44 @@ export namespace Prisma {
   }
 
   /**
+   * Order.nfc
+   */
+  export type Order$nfcArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OrderNFC
+     */
+    select?: OrderNFCSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OrderNFC
+     */
+    omit?: OrderNFCOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
+    where?: OrderNFCWhereInput
+  }
+
+  /**
+   * Order.nft
+   */
+  export type Order$nftArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OrderNFT
+     */
+    select?: OrderNFTSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OrderNFT
+     */
+    omit?: OrderNFTOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
+    where?: OrderNFTWhereInput
+  }
+
+  /**
    * Order without action
    */
   export type OrderDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11802,18 +11848,21 @@ export namespace Prisma {
 
   export type OrderNFCMinAggregateOutputType = {
     id: string | null
+    nfcId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type OrderNFCMaxAggregateOutputType = {
     id: string | null
+    nfcId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type OrderNFCCountAggregateOutputType = {
     id: number
+    nfcId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11822,18 +11871,21 @@ export namespace Prisma {
 
   export type OrderNFCMinAggregateInputType = {
     id?: true
+    nfcId?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type OrderNFCMaxAggregateInputType = {
     id?: true
+    nfcId?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type OrderNFCCountAggregateInputType = {
     id?: true
+    nfcId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -11913,6 +11965,7 @@ export namespace Prisma {
 
   export type OrderNFCGroupByOutputType = {
     id: string
+    nfcId: string
     createdAt: Date
     updatedAt: Date
     _count: OrderNFCCountAggregateOutputType | null
@@ -11936,35 +11989,54 @@ export namespace Prisma {
 
   export type OrderNFCSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    nfcId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderNFC"]>
 
   export type OrderNFCSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    nfcId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderNFC"]>
 
   export type OrderNFCSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    nfcId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderNFC"]>
 
   export type OrderNFCSelectScalar = {
     id?: boolean
+    nfcId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type OrderNFCOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt", ExtArgs["result"]["orderNFC"]>
+  export type OrderNFCOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "nfcId" | "createdAt" | "updatedAt", ExtArgs["result"]["orderNFC"]>
+  export type OrderNFCInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
+  }
+  export type OrderNFCIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
+  }
+  export type OrderNFCIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
+  }
 
   export type $OrderNFCPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "OrderNFC"
-    objects: {}
+    objects: {
+      Order: Prisma.$OrderPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      nfcId: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["orderNFC"]>
@@ -12361,6 +12433,7 @@ export namespace Prisma {
    */
   export interface Prisma__OrderNFCClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    Order<T extends OrderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrderDefaultArgs<ExtArgs>>): Prisma__OrderClient<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12391,6 +12464,7 @@ export namespace Prisma {
    */
   interface OrderNFCFieldRefs {
     readonly id: FieldRef<"OrderNFC", 'String'>
+    readonly nfcId: FieldRef<"OrderNFC", 'String'>
     readonly createdAt: FieldRef<"OrderNFC", 'DateTime'>
     readonly updatedAt: FieldRef<"OrderNFC", 'DateTime'>
   }
@@ -12410,6 +12484,10 @@ export namespace Prisma {
      */
     omit?: OrderNFCOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFC to fetch.
      */
     where: OrderNFCWhereUniqueInput
@@ -12428,6 +12506,10 @@ export namespace Prisma {
      */
     omit?: OrderNFCOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFC to fetch.
      */
     where: OrderNFCWhereUniqueInput
@@ -12445,6 +12527,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFC
      */
     omit?: OrderNFCOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
     /**
      * Filter, which OrderNFC to fetch.
      */
@@ -12494,6 +12580,10 @@ export namespace Prisma {
      */
     omit?: OrderNFCOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFC to fetch.
      */
     where?: OrderNFCWhereInput
@@ -12542,6 +12632,10 @@ export namespace Prisma {
      */
     omit?: OrderNFCOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFCS to fetch.
      */
     where?: OrderNFCWhereInput
@@ -12585,6 +12679,10 @@ export namespace Prisma {
      */
     omit?: OrderNFCOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
+    /**
      * The data needed to create a OrderNFC.
      */
     data: XOR<OrderNFCCreateInput, OrderNFCUncheckedCreateInput>
@@ -12618,6 +12716,10 @@ export namespace Prisma {
      */
     data: OrderNFCCreateManyInput | OrderNFCCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -12632,6 +12734,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFC
      */
     omit?: OrderNFCOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
     /**
      * The data needed to update a OrderNFC.
      */
@@ -12684,6 +12790,10 @@ export namespace Prisma {
      * Limit how many OrderNFCS to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -12698,6 +12808,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFC
      */
     omit?: OrderNFCOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
     /**
      * The filter to search for the OrderNFC to update in case it exists.
      */
@@ -12724,6 +12838,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFC
      */
     omit?: OrderNFCOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
     /**
      * Filter which OrderNFC to delete.
      */
@@ -12756,6 +12874,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFC
      */
     omit?: OrderNFCOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFCInclude<ExtArgs> | null
   }
 
 
@@ -12771,18 +12893,21 @@ export namespace Prisma {
 
   export type OrderNFTMinAggregateOutputType = {
     id: string | null
+    tokenId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type OrderNFTMaxAggregateOutputType = {
     id: string | null
+    tokenId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type OrderNFTCountAggregateOutputType = {
     id: number
+    tokenId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -12791,18 +12916,21 @@ export namespace Prisma {
 
   export type OrderNFTMinAggregateInputType = {
     id?: true
+    tokenId?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type OrderNFTMaxAggregateInputType = {
     id?: true
+    tokenId?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type OrderNFTCountAggregateInputType = {
     id?: true
+    tokenId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12882,6 +13010,7 @@ export namespace Prisma {
 
   export type OrderNFTGroupByOutputType = {
     id: string
+    tokenId: string
     createdAt: Date
     updatedAt: Date
     _count: OrderNFTCountAggregateOutputType | null
@@ -12905,35 +13034,54 @@ export namespace Prisma {
 
   export type OrderNFTSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    tokenId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderNFT"]>
 
   export type OrderNFTSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    tokenId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderNFT"]>
 
   export type OrderNFTSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    tokenId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderNFT"]>
 
   export type OrderNFTSelectScalar = {
     id?: boolean
+    tokenId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type OrderNFTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt", ExtArgs["result"]["orderNFT"]>
+  export type OrderNFTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tokenId" | "createdAt" | "updatedAt", ExtArgs["result"]["orderNFT"]>
+  export type OrderNFTInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
+  }
+  export type OrderNFTIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
+  }
+  export type OrderNFTIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Order?: boolean | OrderDefaultArgs<ExtArgs>
+  }
 
   export type $OrderNFTPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "OrderNFT"
-    objects: {}
+    objects: {
+      Order: Prisma.$OrderPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      tokenId: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["orderNFT"]>
@@ -13330,6 +13478,7 @@ export namespace Prisma {
    */
   export interface Prisma__OrderNFTClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    Order<T extends OrderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrderDefaultArgs<ExtArgs>>): Prisma__OrderClient<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13360,6 +13509,7 @@ export namespace Prisma {
    */
   interface OrderNFTFieldRefs {
     readonly id: FieldRef<"OrderNFT", 'String'>
+    readonly tokenId: FieldRef<"OrderNFT", 'String'>
     readonly createdAt: FieldRef<"OrderNFT", 'DateTime'>
     readonly updatedAt: FieldRef<"OrderNFT", 'DateTime'>
   }
@@ -13379,6 +13529,10 @@ export namespace Prisma {
      */
     omit?: OrderNFTOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFT to fetch.
      */
     where: OrderNFTWhereUniqueInput
@@ -13397,6 +13551,10 @@ export namespace Prisma {
      */
     omit?: OrderNFTOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFT to fetch.
      */
     where: OrderNFTWhereUniqueInput
@@ -13414,6 +13572,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFT
      */
     omit?: OrderNFTOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
     /**
      * Filter, which OrderNFT to fetch.
      */
@@ -13463,6 +13625,10 @@ export namespace Prisma {
      */
     omit?: OrderNFTOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFT to fetch.
      */
     where?: OrderNFTWhereInput
@@ -13511,6 +13677,10 @@ export namespace Prisma {
      */
     omit?: OrderNFTOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
+    /**
      * Filter, which OrderNFTS to fetch.
      */
     where?: OrderNFTWhereInput
@@ -13554,6 +13724,10 @@ export namespace Prisma {
      */
     omit?: OrderNFTOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
+    /**
      * The data needed to create a OrderNFT.
      */
     data: XOR<OrderNFTCreateInput, OrderNFTUncheckedCreateInput>
@@ -13587,6 +13761,10 @@ export namespace Prisma {
      */
     data: OrderNFTCreateManyInput | OrderNFTCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -13601,6 +13779,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFT
      */
     omit?: OrderNFTOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
     /**
      * The data needed to update a OrderNFT.
      */
@@ -13653,6 +13835,10 @@ export namespace Prisma {
      * Limit how many OrderNFTS to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -13667,6 +13853,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFT
      */
     omit?: OrderNFTOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
     /**
      * The filter to search for the OrderNFT to update in case it exists.
      */
@@ -13693,6 +13883,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFT
      */
     omit?: OrderNFTOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
     /**
      * Filter which OrderNFT to delete.
      */
@@ -13725,6 +13919,10 @@ export namespace Prisma {
      * Omit specific fields from the OrderNFT
      */
     omit?: OrderNFTOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderNFTInclude<ExtArgs> | null
   }
 
 
@@ -17040,6 +17238,7 @@ export namespace Prisma {
 
   export const OrderNFCScalarFieldEnum: {
     id: 'id',
+    nfcId: 'nfcId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -17049,6 +17248,7 @@ export namespace Prisma {
 
   export const OrderNFTScalarFieldEnum: {
     id: 'id',
+    tokenId: 'tokenId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -17702,6 +17902,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
     delivery?: XOR<DeliveryNullableScalarRelationFilter, DeliveryWhereInput> | null
+    nfc?: XOR<OrderNFCNullableScalarRelationFilter, OrderNFCWhereInput> | null
+    nft?: XOR<OrderNFTNullableScalarRelationFilter, OrderNFTWhereInput> | null
   }
 
   export type OrderOrderByWithRelationInput = {
@@ -17709,6 +17911,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     delivery?: DeliveryOrderByWithRelationInput
+    nfc?: OrderNFCOrderByWithRelationInput
+    nft?: OrderNFTOrderByWithRelationInput
   }
 
   export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -17719,6 +17923,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
     delivery?: XOR<DeliveryNullableScalarRelationFilter, DeliveryWhereInput> | null
+    nfc?: XOR<OrderNFCNullableScalarRelationFilter, OrderNFCWhereInput> | null
+    nft?: XOR<OrderNFTNullableScalarRelationFilter, OrderNFTWhereInput> | null
   }, "id">
 
   export type OrderOrderByWithAggregationInput = {
@@ -17744,27 +17950,34 @@ export namespace Prisma {
     OR?: OrderNFCWhereInput[]
     NOT?: OrderNFCWhereInput | OrderNFCWhereInput[]
     id?: StringFilter<"OrderNFC"> | string
+    nfcId?: StringFilter<"OrderNFC"> | string
     createdAt?: DateTimeFilter<"OrderNFC"> | Date | string
     updatedAt?: DateTimeFilter<"OrderNFC"> | Date | string
+    Order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
   }
 
   export type OrderNFCOrderByWithRelationInput = {
     id?: SortOrder
+    nfcId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    Order?: OrderOrderByWithRelationInput
   }
 
   export type OrderNFCWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    nfcId?: string
     AND?: OrderNFCWhereInput | OrderNFCWhereInput[]
     OR?: OrderNFCWhereInput[]
     NOT?: OrderNFCWhereInput | OrderNFCWhereInput[]
     createdAt?: DateTimeFilter<"OrderNFC"> | Date | string
     updatedAt?: DateTimeFilter<"OrderNFC"> | Date | string
-  }, "id">
+    Order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
+  }, "id" | "nfcId">
 
   export type OrderNFCOrderByWithAggregationInput = {
     id?: SortOrder
+    nfcId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: OrderNFCCountOrderByAggregateInput
@@ -17777,6 +17990,7 @@ export namespace Prisma {
     OR?: OrderNFCScalarWhereWithAggregatesInput[]
     NOT?: OrderNFCScalarWhereWithAggregatesInput | OrderNFCScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"OrderNFC"> | string
+    nfcId?: StringWithAggregatesFilter<"OrderNFC"> | string
     createdAt?: DateTimeWithAggregatesFilter<"OrderNFC"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"OrderNFC"> | Date | string
   }
@@ -17786,27 +18000,34 @@ export namespace Prisma {
     OR?: OrderNFTWhereInput[]
     NOT?: OrderNFTWhereInput | OrderNFTWhereInput[]
     id?: StringFilter<"OrderNFT"> | string
+    tokenId?: StringFilter<"OrderNFT"> | string
     createdAt?: DateTimeFilter<"OrderNFT"> | Date | string
     updatedAt?: DateTimeFilter<"OrderNFT"> | Date | string
+    Order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
   }
 
   export type OrderNFTOrderByWithRelationInput = {
     id?: SortOrder
+    tokenId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    Order?: OrderOrderByWithRelationInput
   }
 
   export type OrderNFTWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    tokenId?: string
     AND?: OrderNFTWhereInput | OrderNFTWhereInput[]
     OR?: OrderNFTWhereInput[]
     NOT?: OrderNFTWhereInput | OrderNFTWhereInput[]
     createdAt?: DateTimeFilter<"OrderNFT"> | Date | string
     updatedAt?: DateTimeFilter<"OrderNFT"> | Date | string
-  }, "id">
+    Order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
+  }, "id" | "tokenId">
 
   export type OrderNFTOrderByWithAggregationInput = {
     id?: SortOrder
+    tokenId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: OrderNFTCountOrderByAggregateInput
@@ -17819,6 +18040,7 @@ export namespace Prisma {
     OR?: OrderNFTScalarWhereWithAggregatesInput[]
     NOT?: OrderNFTScalarWhereWithAggregatesInput | OrderNFTScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"OrderNFT"> | string
+    tokenId?: StringWithAggregatesFilter<"OrderNFT"> | string
     createdAt?: DateTimeWithAggregatesFilter<"OrderNFT"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"OrderNFT"> | Date | string
   }
@@ -18520,6 +18742,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     delivery?: DeliveryCreateNestedOneWithoutOrderInput
+    nfc?: OrderNFCCreateNestedOneWithoutOrderInput
+    nft?: OrderNFTCreateNestedOneWithoutOrderInput
   }
 
   export type OrderUncheckedCreateInput = {
@@ -18527,6 +18751,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     delivery?: DeliveryUncheckedCreateNestedOneWithoutOrderInput
+    nfc?: OrderNFCUncheckedCreateNestedOneWithoutOrderInput
+    nft?: OrderNFTUncheckedCreateNestedOneWithoutOrderInput
   }
 
   export type OrderUpdateInput = {
@@ -18534,6 +18760,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     delivery?: DeliveryUpdateOneWithoutOrderNestedInput
+    nfc?: OrderNFCUpdateOneWithoutOrderNestedInput
+    nft?: OrderNFTUpdateOneWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateInput = {
@@ -18541,6 +18769,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     delivery?: DeliveryUncheckedUpdateOneWithoutOrderNestedInput
+    nfc?: OrderNFCUncheckedUpdateOneWithoutOrderNestedInput
+    nft?: OrderNFTUncheckedUpdateOneWithoutOrderNestedInput
   }
 
   export type OrderCreateManyInput = {
@@ -18562,85 +18792,97 @@ export namespace Prisma {
   }
 
   export type OrderNFCCreateInput = {
-    id?: string
+    nfcId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    Order?: OrderCreateNestedOneWithoutNfcInput
   }
 
   export type OrderNFCUncheckedCreateInput = {
     id?: string
+    nfcId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type OrderNFCUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    nfcId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Order?: OrderUpdateOneRequiredWithoutNfcNestedInput
   }
 
   export type OrderNFCUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    nfcId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderNFCCreateManyInput = {
     id?: string
+    nfcId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type OrderNFCUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    nfcId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderNFCUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    nfcId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderNFTCreateInput = {
-    id?: string
+    tokenId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    Order?: OrderCreateNestedOneWithoutNftInput
   }
 
   export type OrderNFTUncheckedCreateInput = {
     id?: string
+    tokenId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type OrderNFTUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    tokenId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Order?: OrderUpdateOneRequiredWithoutNftNestedInput
   }
 
   export type OrderNFTUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    tokenId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderNFTCreateManyInput = {
     id?: string
+    tokenId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type OrderNFTUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    tokenId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderNFTUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    tokenId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19262,6 +19504,16 @@ export namespace Prisma {
     isNot?: DeliveryWhereInput | null
   }
 
+  export type OrderNFCNullableScalarRelationFilter = {
+    is?: OrderNFCWhereInput | null
+    isNot?: OrderNFCWhereInput | null
+  }
+
+  export type OrderNFTNullableScalarRelationFilter = {
+    is?: OrderNFTWhereInput | null
+    isNot?: OrderNFTWhereInput | null
+  }
+
   export type OrderCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -19280,45 +19532,51 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type OrderScalarRelationFilter = {
+    is?: OrderWhereInput
+    isNot?: OrderWhereInput
+  }
+
   export type OrderNFCCountOrderByAggregateInput = {
     id?: SortOrder
+    nfcId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type OrderNFCMaxOrderByAggregateInput = {
     id?: SortOrder
+    nfcId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type OrderNFCMinOrderByAggregateInput = {
     id?: SortOrder
+    nfcId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type OrderNFTCountOrderByAggregateInput = {
     id?: SortOrder
+    tokenId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type OrderNFTMaxOrderByAggregateInput = {
     id?: SortOrder
+    tokenId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type OrderNFTMinOrderByAggregateInput = {
     id?: SortOrder
+    tokenId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type OrderScalarRelationFilter = {
-    is?: OrderWhereInput
-    isNot?: OrderWhereInput
   }
 
   export type DeliveryCountOrderByAggregateInput = {
@@ -19736,10 +19994,34 @@ export namespace Prisma {
     connect?: DeliveryWhereUniqueInput
   }
 
+  export type OrderNFCCreateNestedOneWithoutOrderInput = {
+    create?: XOR<OrderNFCCreateWithoutOrderInput, OrderNFCUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFCCreateOrConnectWithoutOrderInput
+    connect?: OrderNFCWhereUniqueInput
+  }
+
+  export type OrderNFTCreateNestedOneWithoutOrderInput = {
+    create?: XOR<OrderNFTCreateWithoutOrderInput, OrderNFTUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFTCreateOrConnectWithoutOrderInput
+    connect?: OrderNFTWhereUniqueInput
+  }
+
   export type DeliveryUncheckedCreateNestedOneWithoutOrderInput = {
     create?: XOR<DeliveryCreateWithoutOrderInput, DeliveryUncheckedCreateWithoutOrderInput>
     connectOrCreate?: DeliveryCreateOrConnectWithoutOrderInput
     connect?: DeliveryWhereUniqueInput
+  }
+
+  export type OrderNFCUncheckedCreateNestedOneWithoutOrderInput = {
+    create?: XOR<OrderNFCCreateWithoutOrderInput, OrderNFCUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFCCreateOrConnectWithoutOrderInput
+    connect?: OrderNFCWhereUniqueInput
+  }
+
+  export type OrderNFTUncheckedCreateNestedOneWithoutOrderInput = {
+    create?: XOR<OrderNFTCreateWithoutOrderInput, OrderNFTUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFTCreateOrConnectWithoutOrderInput
+    connect?: OrderNFTWhereUniqueInput
   }
 
   export type DeliveryUpdateOneWithoutOrderNestedInput = {
@@ -19752,6 +20034,26 @@ export namespace Prisma {
     update?: XOR<XOR<DeliveryUpdateToOneWithWhereWithoutOrderInput, DeliveryUpdateWithoutOrderInput>, DeliveryUncheckedUpdateWithoutOrderInput>
   }
 
+  export type OrderNFCUpdateOneWithoutOrderNestedInput = {
+    create?: XOR<OrderNFCCreateWithoutOrderInput, OrderNFCUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFCCreateOrConnectWithoutOrderInput
+    upsert?: OrderNFCUpsertWithoutOrderInput
+    disconnect?: OrderNFCWhereInput | boolean
+    delete?: OrderNFCWhereInput | boolean
+    connect?: OrderNFCWhereUniqueInput
+    update?: XOR<XOR<OrderNFCUpdateToOneWithWhereWithoutOrderInput, OrderNFCUpdateWithoutOrderInput>, OrderNFCUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type OrderNFTUpdateOneWithoutOrderNestedInput = {
+    create?: XOR<OrderNFTCreateWithoutOrderInput, OrderNFTUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFTCreateOrConnectWithoutOrderInput
+    upsert?: OrderNFTUpsertWithoutOrderInput
+    disconnect?: OrderNFTWhereInput | boolean
+    delete?: OrderNFTWhereInput | boolean
+    connect?: OrderNFTWhereUniqueInput
+    update?: XOR<XOR<OrderNFTUpdateToOneWithWhereWithoutOrderInput, OrderNFTUpdateWithoutOrderInput>, OrderNFTUncheckedUpdateWithoutOrderInput>
+  }
+
   export type DeliveryUncheckedUpdateOneWithoutOrderNestedInput = {
     create?: XOR<DeliveryCreateWithoutOrderInput, DeliveryUncheckedCreateWithoutOrderInput>
     connectOrCreate?: DeliveryCreateOrConnectWithoutOrderInput
@@ -19760,6 +20062,54 @@ export namespace Prisma {
     delete?: DeliveryWhereInput | boolean
     connect?: DeliveryWhereUniqueInput
     update?: XOR<XOR<DeliveryUpdateToOneWithWhereWithoutOrderInput, DeliveryUpdateWithoutOrderInput>, DeliveryUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type OrderNFCUncheckedUpdateOneWithoutOrderNestedInput = {
+    create?: XOR<OrderNFCCreateWithoutOrderInput, OrderNFCUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFCCreateOrConnectWithoutOrderInput
+    upsert?: OrderNFCUpsertWithoutOrderInput
+    disconnect?: OrderNFCWhereInput | boolean
+    delete?: OrderNFCWhereInput | boolean
+    connect?: OrderNFCWhereUniqueInput
+    update?: XOR<XOR<OrderNFCUpdateToOneWithWhereWithoutOrderInput, OrderNFCUpdateWithoutOrderInput>, OrderNFCUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type OrderNFTUncheckedUpdateOneWithoutOrderNestedInput = {
+    create?: XOR<OrderNFTCreateWithoutOrderInput, OrderNFTUncheckedCreateWithoutOrderInput>
+    connectOrCreate?: OrderNFTCreateOrConnectWithoutOrderInput
+    upsert?: OrderNFTUpsertWithoutOrderInput
+    disconnect?: OrderNFTWhereInput | boolean
+    delete?: OrderNFTWhereInput | boolean
+    connect?: OrderNFTWhereUniqueInput
+    update?: XOR<XOR<OrderNFTUpdateToOneWithWhereWithoutOrderInput, OrderNFTUpdateWithoutOrderInput>, OrderNFTUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type OrderCreateNestedOneWithoutNfcInput = {
+    create?: XOR<OrderCreateWithoutNfcInput, OrderUncheckedCreateWithoutNfcInput>
+    connectOrCreate?: OrderCreateOrConnectWithoutNfcInput
+    connect?: OrderWhereUniqueInput
+  }
+
+  export type OrderUpdateOneRequiredWithoutNfcNestedInput = {
+    create?: XOR<OrderCreateWithoutNfcInput, OrderUncheckedCreateWithoutNfcInput>
+    connectOrCreate?: OrderCreateOrConnectWithoutNfcInput
+    upsert?: OrderUpsertWithoutNfcInput
+    connect?: OrderWhereUniqueInput
+    update?: XOR<XOR<OrderUpdateToOneWithWhereWithoutNfcInput, OrderUpdateWithoutNfcInput>, OrderUncheckedUpdateWithoutNfcInput>
+  }
+
+  export type OrderCreateNestedOneWithoutNftInput = {
+    create?: XOR<OrderCreateWithoutNftInput, OrderUncheckedCreateWithoutNftInput>
+    connectOrCreate?: OrderCreateOrConnectWithoutNftInput
+    connect?: OrderWhereUniqueInput
+  }
+
+  export type OrderUpdateOneRequiredWithoutNftNestedInput = {
+    create?: XOR<OrderCreateWithoutNftInput, OrderUncheckedCreateWithoutNftInput>
+    connectOrCreate?: OrderCreateOrConnectWithoutNftInput
+    upsert?: OrderUpsertWithoutNftInput
+    connect?: OrderWhereUniqueInput
+    update?: XOR<XOR<OrderUpdateToOneWithWhereWithoutNftInput, OrderUpdateWithoutNftInput>, OrderUncheckedUpdateWithoutNftInput>
   }
 
   export type OrderCreateNestedOneWithoutDeliveryInput = {
@@ -20542,6 +20892,40 @@ export namespace Prisma {
     create: XOR<DeliveryCreateWithoutOrderInput, DeliveryUncheckedCreateWithoutOrderInput>
   }
 
+  export type OrderNFCCreateWithoutOrderInput = {
+    nfcId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OrderNFCUncheckedCreateWithoutOrderInput = {
+    nfcId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OrderNFCCreateOrConnectWithoutOrderInput = {
+    where: OrderNFCWhereUniqueInput
+    create: XOR<OrderNFCCreateWithoutOrderInput, OrderNFCUncheckedCreateWithoutOrderInput>
+  }
+
+  export type OrderNFTCreateWithoutOrderInput = {
+    tokenId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OrderNFTUncheckedCreateWithoutOrderInput = {
+    tokenId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OrderNFTCreateOrConnectWithoutOrderInput = {
+    where: OrderNFTWhereUniqueInput
+    create: XOR<OrderNFTCreateWithoutOrderInput, OrderNFTUncheckedCreateWithoutOrderInput>
+  }
+
   export type DeliveryUpsertWithoutOrderInput = {
     update: XOR<DeliveryUpdateWithoutOrderInput, DeliveryUncheckedUpdateWithoutOrderInput>
     create: XOR<DeliveryCreateWithoutOrderInput, DeliveryUncheckedCreateWithoutOrderInput>
@@ -20563,16 +20947,162 @@ export namespace Prisma {
     agentId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type OrderNFCUpsertWithoutOrderInput = {
+    update: XOR<OrderNFCUpdateWithoutOrderInput, OrderNFCUncheckedUpdateWithoutOrderInput>
+    create: XOR<OrderNFCCreateWithoutOrderInput, OrderNFCUncheckedCreateWithoutOrderInput>
+    where?: OrderNFCWhereInput
+  }
+
+  export type OrderNFCUpdateToOneWithWhereWithoutOrderInput = {
+    where?: OrderNFCWhereInput
+    data: XOR<OrderNFCUpdateWithoutOrderInput, OrderNFCUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type OrderNFCUpdateWithoutOrderInput = {
+    nfcId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OrderNFCUncheckedUpdateWithoutOrderInput = {
+    nfcId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OrderNFTUpsertWithoutOrderInput = {
+    update: XOR<OrderNFTUpdateWithoutOrderInput, OrderNFTUncheckedUpdateWithoutOrderInput>
+    create: XOR<OrderNFTCreateWithoutOrderInput, OrderNFTUncheckedCreateWithoutOrderInput>
+    where?: OrderNFTWhereInput
+  }
+
+  export type OrderNFTUpdateToOneWithWhereWithoutOrderInput = {
+    where?: OrderNFTWhereInput
+    data: XOR<OrderNFTUpdateWithoutOrderInput, OrderNFTUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type OrderNFTUpdateWithoutOrderInput = {
+    tokenId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OrderNFTUncheckedUpdateWithoutOrderInput = {
+    tokenId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OrderCreateWithoutNfcInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    delivery?: DeliveryCreateNestedOneWithoutOrderInput
+    nft?: OrderNFTCreateNestedOneWithoutOrderInput
+  }
+
+  export type OrderUncheckedCreateWithoutNfcInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    delivery?: DeliveryUncheckedCreateNestedOneWithoutOrderInput
+    nft?: OrderNFTUncheckedCreateNestedOneWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutNfcInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutNfcInput, OrderUncheckedCreateWithoutNfcInput>
+  }
+
+  export type OrderUpsertWithoutNfcInput = {
+    update: XOR<OrderUpdateWithoutNfcInput, OrderUncheckedUpdateWithoutNfcInput>
+    create: XOR<OrderCreateWithoutNfcInput, OrderUncheckedCreateWithoutNfcInput>
+    where?: OrderWhereInput
+  }
+
+  export type OrderUpdateToOneWithWhereWithoutNfcInput = {
+    where?: OrderWhereInput
+    data: XOR<OrderUpdateWithoutNfcInput, OrderUncheckedUpdateWithoutNfcInput>
+  }
+
+  export type OrderUpdateWithoutNfcInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    delivery?: DeliveryUpdateOneWithoutOrderNestedInput
+    nft?: OrderNFTUpdateOneWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutNfcInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    delivery?: DeliveryUncheckedUpdateOneWithoutOrderNestedInput
+    nft?: OrderNFTUncheckedUpdateOneWithoutOrderNestedInput
+  }
+
+  export type OrderCreateWithoutNftInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    delivery?: DeliveryCreateNestedOneWithoutOrderInput
+    nfc?: OrderNFCCreateNestedOneWithoutOrderInput
+  }
+
+  export type OrderUncheckedCreateWithoutNftInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    delivery?: DeliveryUncheckedCreateNestedOneWithoutOrderInput
+    nfc?: OrderNFCUncheckedCreateNestedOneWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutNftInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutNftInput, OrderUncheckedCreateWithoutNftInput>
+  }
+
+  export type OrderUpsertWithoutNftInput = {
+    update: XOR<OrderUpdateWithoutNftInput, OrderUncheckedUpdateWithoutNftInput>
+    create: XOR<OrderCreateWithoutNftInput, OrderUncheckedCreateWithoutNftInput>
+    where?: OrderWhereInput
+  }
+
+  export type OrderUpdateToOneWithWhereWithoutNftInput = {
+    where?: OrderWhereInput
+    data: XOR<OrderUpdateWithoutNftInput, OrderUncheckedUpdateWithoutNftInput>
+  }
+
+  export type OrderUpdateWithoutNftInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    delivery?: DeliveryUpdateOneWithoutOrderNestedInput
+    nfc?: OrderNFCUpdateOneWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutNftInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    delivery?: DeliveryUncheckedUpdateOneWithoutOrderNestedInput
+    nfc?: OrderNFCUncheckedUpdateOneWithoutOrderNestedInput
+  }
+
   export type OrderCreateWithoutDeliveryInput = {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    nfc?: OrderNFCCreateNestedOneWithoutOrderInput
+    nft?: OrderNFTCreateNestedOneWithoutOrderInput
   }
 
   export type OrderUncheckedCreateWithoutDeliveryInput = {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    nfc?: OrderNFCUncheckedCreateNestedOneWithoutOrderInput
+    nft?: OrderNFTUncheckedCreateNestedOneWithoutOrderInput
   }
 
   export type OrderCreateOrConnectWithoutDeliveryInput = {
@@ -20595,12 +21125,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    nfc?: OrderNFCUpdateOneWithoutOrderNestedInput
+    nft?: OrderNFTUpdateOneWithoutOrderNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutDeliveryInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    nfc?: OrderNFCUncheckedUpdateOneWithoutOrderNestedInput
+    nft?: OrderNFTUncheckedUpdateOneWithoutOrderNestedInput
   }
 
   export type UserCreateWithoutKeysInput = {

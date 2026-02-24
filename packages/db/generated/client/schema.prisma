@@ -103,18 +103,24 @@ model Order {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   delivery  Delivery?
+  nfc       OrderNFC?
+  nft       OrderNFT?
 }
 
 model OrderNFC {
   id        String   @id @default(uuid())
+  nfcId     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Order     Order    @relation(fields: [id], references: [id])
 }
 
 model OrderNFT {
   id        String   @id @default(uuid())
+  tokenId   String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Order     Order    @relation(fields: [id], references: [id])
 
   @@index([id])
 }
