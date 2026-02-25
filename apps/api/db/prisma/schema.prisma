@@ -34,6 +34,8 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  orders  Order[]
+
   keys    UserKeys?
   profile UserProfile?
 }
@@ -43,8 +45,10 @@ model Farmer {
   name         String
   email        String         @unique
   passwordHash String
+  orders       Order[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+
   keys         FarmerKeys?
   profile      FarmerProfile?
   products     Products[]
@@ -83,7 +87,7 @@ model DeliveryAgent {
   name         String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
+   
   profile DeliveryAgentProfile?
 }
 
@@ -96,6 +100,8 @@ model DeliveryAgentProfile {
   agent       DeliveryAgent @relation(fields: [agentId], references: [id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+   
+
 }
 
 model Admin {
@@ -103,12 +109,18 @@ model Admin {
   email String @unique
   name String
   passwordHash String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Products {
   id        String   @id @default(uuid())
+  name      String
+  description String
+  price     Float
+  productionDate DateTime
+  orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   farnerId  String
@@ -117,6 +129,14 @@ model Products {
 
 model Order {
   id        String    @id @default(uuid())
+  userId    String
+  farmerId  String
+  productId String
+  quantity  Float
+  user     User      @relation(fields: [userId], references: [id])
+  farmer   Farmer    @relation(fields: [farmerId], references: [id])
+  product  Products  @relation(fields: [productId], references: [id])
+  
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   delivery  Delivery?
@@ -146,9 +166,13 @@ model Delivery {
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id])
   agentId String @unique
-
+   
+  status  DeliveryStatus @default(Initialized)  
+  createdAt DateTime @default(now())
   @@index([id])
 }
+
+
 
 model UserKeys {
   id                  String   @id @default(uuid()) @map("key_id")
