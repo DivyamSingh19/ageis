@@ -12,7 +12,7 @@ const port = 4000
 
 dotenv.config()
 app.use(express.json())
-app.use(cors())
+app.use(cors( ))
 declare global{
     namespace Express{
         interface Request{

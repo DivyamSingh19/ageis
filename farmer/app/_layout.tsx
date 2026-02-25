@@ -20,8 +20,13 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <SafeAreaView style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' }}>
-            <Stack>
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#000000' }}>
+            <Stack
+              screenOptions={{
+                headerStyle: { backgroundColor: '#000000' },
+                headerTintColor: '#fff',
+                contentStyle: { backgroundColor: '#000000' },
+              }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)/login" options={{ title: 'Login', headerShown: false }} />
               <Stack.Screen name="(auth)/register" options={{ title: 'Register', headerShown: false }} />
@@ -36,7 +41,7 @@ export default function RootLayout() {
               <Stack.Screen name="order/track" options={{ title: 'Track Order' }} />
               <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             </Stack>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
           </SafeAreaView>
         </ThemeProvider>
       </SafeAreaProvider>

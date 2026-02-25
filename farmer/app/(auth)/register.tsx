@@ -1,121 +1,317 @@
-import { useState } from 'react';
+import React, { useState } from "react";
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-} from 'react-native';
-import { router } from 'expo-router';
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 
-export default function RegisterScreen() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-    const handleRegister = () => {
-        // TODO: Wire up to your registration logic / API.
-    };
-
-    return (
-        <View className="flex-1 bg-black">
-            <KeyboardAvoidingView
-                className="flex-1"
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-                <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                    contentContainerStyle={{ flexGrow: 1 }}
-                >
-                    <View className="flex-1 justify-center px-6 py-10">
-                        {/* Subtle glow background */}
-                        <View className="absolute -bottom-24 -right-16 w-72 h-72 rounded-full bg-emerald-500/20 blur-2xl" />
-
-                        {/* Logo + heading */}
-                        <View className="items-center mb-10">
-                            <View className="w-10 h-10 mb-4 items-center justify-center rounded-full border border-emerald-400">
-                                <Text className="text-2xl font-semibold text-emerald-400">a</Text>
-                            </View>
-                            <Text className="text-3xl font-semibold text-emerald-400">Sign Up</Text>
-                        </View>
-
-                        {/* Card */}
-                        <View className="bg-neutral-900/90 rounded-3xl p-6 border border-neutral-800">
-                            {/* Name */}
-                            <View className="mb-4">
-                                <Text className="text-neutral-400 text-xs mb-1">Name</Text>
-                                <TextInput
-                                    className="h-11 px-3 rounded-xl bg-neutral-800 text-white text-sm"
-                                    placeholder="eg. Jane Doe"
-                                    placeholderTextColor="#6b7280"
-                                    value={name}
-                                    onChangeText={setName}
-                                    autoCapitalize="words"
-                                    returnKeyType="next"
-                                />
-                            </View>
-
-                            {/* Email */}
-                            <View className="mb-4">
-                                <Text className="text-neutral-400 text-xs mb-1">Email</Text>
-                                <TextInput
-                                    className="h-11 px-3 rounded-xl bg-neutral-800 text-white text-sm"
-                                    placeholder="eg. janedoe@gmail.com"
-                                    placeholderTextColor="#6b7280"
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    returnKeyType="next"
-                                />
-                            </View>
-
-                            {/* Password */}
-                            <View className="mb-2">
-                                <Text className="text-neutral-400 text-xs mb-1">Password</Text>
-                                <TextInput
-                                    className="h-11 px-3 rounded-xl bg-neutral-800 text-white text-sm"
-                                    placeholder="Must be at least 8 characters"
-                                    placeholderTextColor="#6b7280"
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    secureTextEntry
-                                    autoCapitalize="none"
-                                    returnKeyType="done"
-                                />
-                            </View>
-
-                            <Text className="text-[10px] text-neutral-500 mb-4">
-                                Must be at least 8 characters
-                            </Text>
-
-                            {/* Primary CTA */}
-                            <TouchableOpacity
-                                className="h-12 rounded-full bg-emerald-500 items-center justify-center mt-2 shadow-lg shadow-emerald-500/40"
-                                activeOpacity={0.9}
-                                onPress={handleRegister}
-                            >
-                                <Text className="text-black font-semibold text-sm">Sign Up</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Footer: already have account */}
-                        <View className="flex-row justify-center mt-6">
-                            <Text className="text-neutral-500 text-xs">
-                                Already have an account?{' '}
-                            </Text>
-                            <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-                                <Text className="text-emerald-400 text-xs font-semibold">
-                                    Log in
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </View>
-    );
+interface Props {
+  navigation?: any;
 }
+
+export default function RegisterScreen({ navigation }: Props) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!firstName.trim()) newErrors.firstName = "First name is required";
+    if (!lastName.trim()) newErrors.lastName = "Last name is required";
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!emailRegex.test(email)) newErrors.email = "Invalid email address";
+    if (!password) newErrors.password = "Password is required";
+    else if (password.length < 8) newErrors.password = "Must be at least 8 characters";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegister = async () => {
+    if (!validate()) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/farmer/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Registration Failed", data.message || "Something went wrong");
+        return;
+      }
+
+      // Store data.data.token in your auth store here before navigating
+      Alert.alert("Success", data.message, [
+        { text: "OK", onPress: () => navigation?.navigate("Login") },
+      ]);
+    } catch (error) {
+        console.error(error);
+      Alert.alert("Network Error", "Unable to reach the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={s.root}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Logo placeholder ── */}
+        <View style={s.logoWrap}>
+          <View style={s.logoBox}>
+            {/* Replace with: <Image source={require('../assets/logo.png')} style={s.logoImg} resizeMode="contain" /> */}
+            <Text style={s.logoText}>LOGO</Text>
+          </View>
+        </View>
+
+        {/* ── Heading ── */}
+        <Text style={s.heading}>Sign Up</Text>
+        <Text style={s.subheading}>Create your farmer account</Text>
+
+        {/* ── First Name ── */}
+        <View style={s.fieldWrap}>
+          <TextInput
+            style={[s.input, errors.firstName ? s.inputError : s.inputNormal]}
+            placeholder="eg. Jane"
+            placeholderTextColor="#3d5c3d"
+            value={firstName}
+            onChangeText={(t) => {
+              setFirstName(t);
+              if (errors.firstName) setErrors((e) => ({ ...e, firstName: "" }));
+            }}
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
+          {errors.firstName ? (
+            <Text style={s.errorText}>{errors.firstName}</Text>
+          ) : null}
+        </View>
+
+        {/* ── Last Name ── */}
+        <View style={s.fieldWrap}>
+          <TextInput
+            style={[s.input, errors.lastName ? s.inputError : s.inputNormal]}
+            placeholder="eg. Doe"
+            placeholderTextColor="#3d5c3d"
+            value={lastName}
+            onChangeText={(t) => {
+              setLastName(t);
+              if (errors.lastName) setErrors((e) => ({ ...e, lastName: "" }));
+            }}
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
+          {errors.lastName ? (
+            <Text style={s.errorText}>{errors.lastName}</Text>
+          ) : null}
+        </View>
+
+        {/* ── Email ── */}
+        <View style={s.fieldWrap}>
+          <TextInput
+            style={[s.input, errors.email ? s.inputError : s.inputNormal]}
+            placeholder="eg. janedoe@gmail.com"
+            placeholderTextColor="#3d5c3d"
+            value={email}
+            onChangeText={(t) => {
+              setEmail(t);
+              if (errors.email) setErrors((e) => ({ ...e, email: "" }));
+            }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+          />
+          {errors.email ? (
+            <Text style={s.errorText}>{errors.email}</Text>
+          ) : null}
+        </View>
+
+        {/* ── Password ── */}
+        <View style={s.fieldWrap}>
+          <TextInput
+            style={[s.input, errors.password ? s.inputError : s.inputNormal]}
+            placeholder="Min. 8 characters"
+            placeholderTextColor="#3d5c3d"
+            value={password}
+            onChangeText={(t) => {
+              setPassword(t);
+              if (errors.password) setErrors((e) => ({ ...e, password: "" }));
+            }}
+            secureTextEntry
+            returnKeyType="done"
+            onSubmitEditing={handleRegister}
+          />
+          {errors.password ? (
+            <Text style={s.errorText}>{errors.password}</Text>
+          ) : (
+            <Text style={s.hintText}>Must be at least 8 characters</Text>
+          )}
+        </View>
+
+        {/* ── Submit ── */}
+        <TouchableOpacity
+          style={[s.btn, loading && s.btnLoading]}
+          onPress={handleRegister}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          {loading ? (
+            <ActivityIndicator color="#0a0f0a" />
+          ) : (
+            <Text style={s.btnText}>Sign Up</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* ── Login link ── */}
+        <View style={s.footer}>
+          <Text style={s.footerText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation?.navigate("Login")} activeOpacity={0.7}>
+            <Text style={s.footerLink}>Log In</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const s = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#0a0f0a",
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 72,
+    paddingBottom: 40,
+  },
+  logoWrap: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
+  logoBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: "#1a2a1a",
+    borderWidth: 1,
+    borderColor: "rgba(57,255,20,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoImg: {
+    width: 40,
+    height: 40,
+  },
+  logoText: {
+    color: "#39ff14",
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 2,
+  },
+  heading: {
+    color: "#ffffff",
+    fontSize: 30,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  subheading: {
+    color: "#6b7f6b",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 32,
+  },
+  fieldWrap: {
+    marginBottom: 16,
+  },
+  input: {
+    backgroundColor: "#131a13",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    color: "#ffffff",
+    fontSize: 14,
+  },
+  inputNormal: {
+    borderColor: "#2a3a2a",
+  },
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  errorText: {
+    color: "#f87171",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  hintText: {
+    color: "#3d5c3d",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  btn: {
+    marginTop: 32,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#39ff14",
+  },
+  btnLoading: {
+    backgroundColor: "#2aad0e",
+  },
+  btnText: {
+    color: "#0a0f0a",
+    fontWeight: "700",
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+  footerText: {
+    color: "#6b7f6b",
+    fontSize: 14,
+  },
+  footerLink: {
+    color: "#39ff14",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+});

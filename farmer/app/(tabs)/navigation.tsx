@@ -23,10 +23,10 @@ export default function FarmerNavigationHub() {
     ];
 
     return (
-        <ScrollView className="flex-1 bg-green-50 p-4">
+        <ScrollView className="flex-1 bg-black p-4">
             <View className="mb-6">
-                <Text className="text-3xl font-bold text-green-900">Farmer Hub</Text>
-                <Text className="text-green-700 mt-1"> структурный доступ к страницам фермера</Text>
+                <Text className="text-3xl font-bold text-white">Farmer Hub</Text>
+                <Text className="text-gray-400 mt-1"> структурный доступ к страницам фермера</Text>
             </View>
 
             <View className="space-y-3">
@@ -34,11 +34,11 @@ export default function FarmerNavigationHub() {
                     <TouchableOpacity
                         key={link.href}
                         onPress={() => router.push(link.href as any)}
-                        className="bg-white p-4 rounded-xl border border-green-200 shadow-sm active:bg-green-100"
+                        className="bg-[#1a1a1a] p-4 rounded-xl border border-white/10 shadow-sm active:bg-[#2a2a2a]"
                     >
                         <View className="flex-row justify-between items-center">
-                            <Text className="text-lg font-semibold text-gray-800">{link.name}</Text>
-                            <Text className="text-green-600 font-medium">{link.href}</Text>
+                            <Text className="text-lg font-semibold text-white">{link.name}</Text>
+                            <Text className="text-green-500 font-medium">{link.href}</Text>
                         </View>
                     </TouchableOpacity>
                 ))}
