@@ -121,6 +121,7 @@ model Products {
   pinataImageUrl String?
   category       String?
   isActive       Boolean  @default(true)
+  verified       Boolean  @default(false)
   orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
