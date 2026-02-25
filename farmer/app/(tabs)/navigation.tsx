@@ -8,7 +8,7 @@ export default function FarmerNavigationHub() {
     const links = [
         { name: 'Login', href: '/(auth)/login' },
         { name: 'Register', href: '/(auth)/register' },
-        { name: 'Marketplace', href: '/(tabs)/marketplace' },
+        
         { name: 'Profile', href: '/(tabs)/profile' },
         { name: 'New Product', href: '/(tabs)/new-product' },
         { name: 'Onboarding', href: '/onboarding' },
