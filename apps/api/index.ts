@@ -6,6 +6,7 @@ import {router as deliveryAuthRouter} from "./routes/delivery/auth"
 import {router as farmerAuthRouter} from "./routes/farmer/auth.routes"
 import {router as userAuthRouter} from "./routes/user/auth"
 import keyRouter from "./blockchain/routes/key.routes"
+import router from "./routes/farmer/verify"
 const app = express()
 const port = 4000
 
@@ -56,7 +57,8 @@ app.use("/api/delivery/auth",deliveryAuthRouter)
 //farmer routes
 app.use("/api/farmer/auth",farmerAuthRouter)
 
-
+//gemini verification route
+app.post("/api/farmer/verify-product",router)
 
 
 

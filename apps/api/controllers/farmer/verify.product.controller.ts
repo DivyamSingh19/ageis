@@ -19,7 +19,7 @@ export const verifyProductWithGemini = async (req:Request, res:Response) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Fetch image from Pinata
+  
     const imageResponse = await axios.get(product.pinataImageUrl, {
       responseType: "arraybuffer"
     });
