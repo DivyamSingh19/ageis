@@ -1,4 +1,4 @@
-import prisma from "@repo/db";
+import prisma from "../../db/prisma";
 export class ProductService {
   static async getById(productId: string) {
     return prisma.product.findUnique({

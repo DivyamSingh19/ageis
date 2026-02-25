@@ -1,5 +1,4 @@
-import prisma from "@repo/db";
-
+import prisma from "../../db/prisma";
 
 
 export class UserService{
