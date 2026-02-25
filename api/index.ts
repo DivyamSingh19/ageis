@@ -37,22 +37,7 @@ app.get("/",async (req:Request,res:Response) => {
         })
     }
 })
-
-//admin routes
-app.use("/api/admin/auth",adminAuthRouter)
-
  
-
-
-
-
-
-
-//delivery partner routes
-app.use("/api/delivery/auth",deliveryAuthRouter)
-
-
-
 
 
 

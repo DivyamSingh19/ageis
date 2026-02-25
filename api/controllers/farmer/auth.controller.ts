@@ -33,8 +33,16 @@ export class AuthController{
                 if(!token){
                     return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error creating token",token, email})
                 }
-                return res.status(HTTPStatus.CREATED).json({message:"Farmer created successfully",})
+                return res.status(HTTPStatus.CREATED).json({message:"Farmer created successfully",data:{
+                    token,
+                    farmer:{
+                        id:farmer.id,
+                        name:farmer.name,
+                        email:farmer.email
+                    }
+                }})
         } catch (error) {
+            console.log(error);
             return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error creating farmer",error})
         }
     }
@@ -60,7 +68,11 @@ export class AuthController{
                 if(!token){
                     return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error creating token"})
                 }
-                return res.status(HTTPStatus.OK).json({message:"Logged in successfully",token})
+                return res.status(HTTPStatus.OK).json({message:"Logged in successfully",token,data:{
+                    id:farmer.id,
+                    name:farmer.name,
+                    email:farmer.email
+                }})
 
         } catch (error) {
             return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error logging in",error})
@@ -69,13 +81,13 @@ export class AuthController{
 
     me = async (req:Request,res:Response) => {
         try {
-            const farmerId = req.farmerId
-            if(!farmerId){
+            const email = req.body
+            if(!email){
                 return res.status(HTTPStatus.BAD_REQUEST).json({message:"Farmer ID is required"})
             }
             const farmer = await prisma.farmer.findUnique({
                 where:{
-                    id:farmerId
+                    email:email
                 }
             })
             if(!farmer){
