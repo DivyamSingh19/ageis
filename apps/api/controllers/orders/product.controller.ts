@@ -1,5 +1,5 @@
 import { Request,Response } from "express"
-import prisma from "@repo/db"
+import prisma from "../../db/prisma"
 import { ProductService } from "../../services/products/main"
 
 

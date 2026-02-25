@@ -1,6 +1,6 @@
 import { UserService } from "../../services/user/main";
 import { OrderService } from "../../services/orders/main";
-import prisma from "@repo/db";
+import prisma from "../../db/prisma";
 import { Request,Response } from "express";
 import { HTTPStatus } from "../../services/http/status";
 

@@ -9,10 +9,10 @@
     "build": "tsc -b"
   },
   "devDependencies": {
-    "@repo/db": "*",
     "@repo/typescript-config": "*",
     "@repo/utils": "*",
-    "@repo/zod": "*"
+    "@repo/zod": "*",
+    "prisma": "6"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,8 @@
   "type": "commonjs",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@prisma/client": "^7.4.1",
+    "@prisma/client": "6",
+    "@prisma/extension-accelerate": "^3.0.1",
     "@solana/web3.js": "^1.98.4",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",

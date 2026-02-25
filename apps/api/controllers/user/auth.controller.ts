@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { HTTPStatus } from "../../services/http/status"
-import prisma from "@repo/db"
+import prisma from "../../db/prisma"
 import { hashPassword,validatePassword,createToken } from "../../utils/tokens"
 export class AuthController{
     register = async (req:Request,res:Response) => {
@@ -26,7 +26,7 @@ export class AuthController{
                     data:{
                         name,
                         email,
-                        password:hashedPassword
+                        passwordHash:hashedPassword
                     }
                 })
                 const token = await createToken(user.id)
@@ -52,7 +52,7 @@ export class AuthController{
                 if(!farmer){
                     return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid credentials"})
                 }
-                const isValidPassword = await validatePassword(password,farmer.password)
+                const isValidPassword = await validatePassword(password,farmer.passwordHash)
                 if(!isValidPassword){
                     return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid credentials"})
                 }

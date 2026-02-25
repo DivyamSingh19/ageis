@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { HTTPStatus } from "../../services/http/status"
-import prisma from "@repo/db"
+import prisma from "../../db/prisma"
 import { hashPassword,validatePassword,createToken } from "../../utils/tokens"
 export class AuthController{
     register = async (req:Request,res:Response) => {
@@ -13,7 +13,7 @@ export class AuthController{
              if(!regex.test(email)){
                 return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid email"})
              }
-             const existingDeliveryPartner = await prisma.deliveryPartner.findUnique({
+             const existingDeliveryPartner = await prisma.deliveryAgent.findUnique({
                 where:{
                     email
                 }             
@@ -22,11 +22,11 @@ export class AuthController{
                     return res.status(HTTPStatus.BAD_REQUEST).json({message:"Delivery Partner already exists"})
                 }
                 const hashedPassword = await hashPassword(password)
-                const deliveryPartner = await prisma.deliveryPartner.create({
+                const deliveryPartner = await prisma.deliveryAgent.create({
                     data:{
                         name,
                         email,
-                        password:hashedPassword
+                        passwordHash:hashedPassword
                     }
                 })
                 const token = await createToken(deliveryPartner.id)
@@ -44,7 +44,7 @@ export class AuthController{
             if(!email || !password){
                 return res.status(HTTPStatus.BAD_REQUEST).json({message:"All fields are required"})
              }
-                const deliveryPartner = await prisma.deliveryPartner.findUnique({
+                const deliveryPartner = await prisma.deliveryAgent.findUnique({
                     where:{
                         email
                     }
@@ -52,7 +52,7 @@ export class AuthController{
                 if(!deliveryPartner){
                     return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid credentials"})
                 }
-                const isValidPassword = await validatePassword(password,deliveryPartner.password)
+                const isValidPassword = await validatePassword(password,deliveryPartner.passwordHash)
                 if(!isValidPassword){
                     return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid credentials"})
                 }
@@ -73,7 +73,7 @@ export class AuthController{
             if(!deliveryPartnerId){
                 return res.status(HTTPStatus.BAD_REQUEST).json({message:"Delivery Partner ID is required"})
             }
-            const deliveryPartner  = await prisma.deliveryPartner.findUnique({
+            const deliveryPartner  = await prisma.deliveryAgent.findUnique({
                 where:{ 
                     id:deliveryPartnerId
                 }
