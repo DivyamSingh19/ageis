@@ -43,6 +43,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@google/generative-ai": "^0.24.1",
+        "@prisma/client": "^7.4.1",
         "@solana/web3.js": "^1.98.4",
         "@types/bcrypt": "^6.0.0",
         "@types/cors": "^2.8.19",

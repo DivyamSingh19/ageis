@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { HTTPStatus } from "../../services/http/status"
-import prisma from "@repo/db"
+import prisma from "../../db/prisma"
 import { hashPassword,validatePassword,createToken } from "../../utils/tokens"
 export class AuthController{
     register = async (req:Request,res:Response) => {
@@ -24,8 +24,9 @@ export class AuthController{
                 const hashedPassword = await hashPassword(password)
                 const admin = await prisma.admin.create({
                     data:{
-                        name,
+                        
                         email,
+                        name
                         password:hashedPassword
                     }
                 })

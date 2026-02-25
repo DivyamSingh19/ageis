@@ -23,6 +23,8 @@ declare global{
         }
     }
 }
+
+
 app.get("/",async (req:Request,res:Response) => {
     try {
         res.json({
@@ -76,7 +78,7 @@ app.use("/api/user/keys",keyRouter)
 
 
 
-
+//server
 app.listen(port,()=>{
     console.log("Server started on :",port);
 })
