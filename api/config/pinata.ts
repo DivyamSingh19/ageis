@@ -5,4 +5,5 @@ const pinataConfig = new PinataSDK({
   pinataGateway: process.env.PINATA_GATEWAY as string,
 });
   
- 
+ export const pinata = pinataConfig;
+ export const PINATA_GATEWAY = process.env.PINATA_GATEWAY as string;
