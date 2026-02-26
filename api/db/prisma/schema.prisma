@@ -130,6 +130,16 @@ model Products {
   updatedAt DateTime @updatedAt
   farmerId  String
   farmer    Farmer   @relation(fields: [farmerId], references: [id])
+  nft       ProductNFT?
+}
+
+model ProductNFT{
+  id        String   @id @default(uuid())
+  tokenId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Products @relation(fields: [id], references: [id])
+  @@index([id])
 }
 
 model Order {
