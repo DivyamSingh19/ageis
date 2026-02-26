@@ -5,9 +5,10 @@ import * as Crypto from 'expo-crypto';
 import { base58Encode } from '../utils/base58';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const TEST_FARMER_ID = '8e2ecf36-31f4-4df0-8247-52f6ddb8722a';
+import { useAuth } from '../context/auth-context';
 
 export default function CreateWalletScreen() {
+    const { user, completeOnboarding } = useAuth();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
     const [publicKey, setPublicKey] = useState<string | null>(null);
@@ -21,7 +22,9 @@ export default function CreateWalletScreen() {
 
         try {
             // 1. Generate Ed25519 keypair on the client
-            const keyPair = nacl.sign.keyPair();
+            // We use fromSeed because tweetnacl fails with "no PRNG" in React Native
+            const seed = await Crypto.getRandomBytesAsync(32);
+            const keyPair = nacl.sign.keyPair.fromSeed(seed);
 
             // 2. Encode the public key to base58 (Solana format)
             const pubKeyBase58 = base58Encode(keyPair.publicKey);
@@ -45,7 +48,7 @@ export default function CreateWalletScreen() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    farmerId: TEST_FARMER_ID,
+                    farmerId: user?.id,
                     publicKey: pubKeyBase58,
                     encryptedPrivateKey: secretKeyHex,
                     meta: {
@@ -64,6 +67,9 @@ export default function CreateWalletScreen() {
 
             setPublicKey(pubKeyBase58);
             setResult(JSON.stringify(data, null, 2));
+
+            // Final step: Update onboarding status
+            await completeOnboarding();
         } catch (err: any) {
             setError(err.message || 'Something went wrong');
         } finally {
@@ -124,7 +130,7 @@ export default function CreateWalletScreen() {
 
                 <View className="mt-6 bg-gray-900 p-4 rounded-xl w-full">
                     <Text className="text-gray-500 text-xs">
-                        Test Farmer ID: {TEST_FARMER_ID}
+                        Farmer ID: {user?.id}
                     </Text>
                     <Text className="text-gray-500 text-xs">
                         API: {API_URL}/api/farmer/keys/new

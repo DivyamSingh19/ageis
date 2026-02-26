@@ -2,6 +2,7 @@ import prisma from "../../db/prisma";
 import { Request, Response } from "express";
 import { HTTPStatus } from "../../services/http/status";
 import { uploadFilesToPinata } from "../../services/products/upload.image.service";
+import { getAgeisClient } from "../../blockchain/server.client";
 
 export class ProductController {
   create = async (req: Request, res: Response) => {
@@ -192,6 +193,51 @@ getById = async (req: Request, res: Response) => {
     return res.status(HTTPStatus.OK).json({ product });
   } catch (error) {
     console.error("[ProductController.getById]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};
+
+getNftInfo = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const product = await prisma.products.findUnique({
+      where: { id },
+      include: {
+        nft: true,
+      },
+    });
+
+    if (!product) {
+      return res.status(HTTPStatus.NOT_FOUND).json({ message: "Product not found" });
+    }
+
+    const client = getAgeisClient();
+    const trace = await client.fetchProductTrace(product.id);
+
+    const onChainTrace = trace
+      ? {
+          orderId: trace.orderId,
+          nftMint: trace.nftMint.toBase58(),
+          farmerWallet: trace.farmerWallet.toBase58(),
+          productName: trace.productName,
+          metadataUri: trace.metadataUri,
+          createdAt: trace.createdAt.toString(),
+          bump: trace.bump,
+        }
+      : null;
+
+    const mintAddress = product.nft?.tokenId ?? onChainTrace?.nftMint ?? null;
+
+    return res.status(HTTPStatus.OK).json({
+      verified: product.verified,
+      mintAddress,
+      onChainTrace,
+    });
+  } catch (error) {
+    console.error("[ProductController.getNftInfo]", error);
     return res
       .status(HTTPStatus.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal server error" });
