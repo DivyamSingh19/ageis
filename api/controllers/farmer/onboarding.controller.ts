@@ -23,7 +23,7 @@ export class OnboardingController {
                     .json({ message: "Farmer not found" });
             }
 
-            if (farmer.onboardingStatus) {
+            if (farmer.onboardingComplete) {
                 return res
                     .status(HTTPStatus.BAD_REQUEST)
                     .json({ message: "Onboarding already completed" });

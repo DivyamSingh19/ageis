@@ -11,6 +11,8 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
+import { useAuth } from "../../context/auth-context";
+import { useRouter } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -18,7 +20,8 @@ interface Props {
   navigation?: any;
 }
 
-export default function LoginScreen({ navigation }: Props) {
+export default function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,6 +37,8 @@ export default function LoginScreen({ navigation }: Props) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!validate()) return;
@@ -55,10 +60,7 @@ export default function LoginScreen({ navigation }: Props) {
         return;
       }
 
-      // Store data.token in your auth store here, then navigate
-      // e.g. await AsyncStorage.setItem('token', data.token)
-      // navigation?.navigate('Dashboard')
-      Alert.alert("Welcome back!", data.message);
+      await login(data.token, data.data, data.data.onboardingComplete);
     } catch (error) {
       Alert.alert("Network Error", "Unable to reach the server. Please try again.");
     } finally {
@@ -149,7 +151,7 @@ export default function LoginScreen({ navigation }: Props) {
         {/* ── Register link ── */}
         <View style={s.footer}>
           <Text style={s.footerText}>Don&apos;t have an account? </Text>
-          <TouchableOpacity onPress={() => navigation?.navigate("Register")} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.push("/(auth)/register")} activeOpacity={0.7}>
             <Text style={s.footerLink}>Sign up</Text>
           </TouchableOpacity>
         </View>

@@ -11,6 +11,8 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
+import { useAuth } from "../../context/auth-context";
+import { useRouter } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -18,7 +20,9 @@ interface Props {
   navigation?: any;
 }
 
-export default function RegisterScreen({ navigation }: Props) {
+export default function RegisterScreen() {
+  const router = useRouter();
+  const { register } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,18 +58,14 @@ export default function RegisterScreen({ navigation }: Props) {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         Alert.alert("Registration Failed", data.message || "Something went wrong");
         return;
       }
 
-      // Store data.data.token in your auth store here before navigating
-      Alert.alert("Success", data.message, [
-        { text: "OK", onPress: () => navigation?.navigate("Login") },
-      ]);
+      await register(data.token, data.data, data.data.onboardingComplete);
     } catch (error) {
-        console.error(error);
+      console.error(error);
       Alert.alert("Network Error", "Unable to reach the server. Please try again.");
     } finally {
       setLoading(false);
@@ -193,7 +193,7 @@ export default function RegisterScreen({ navigation }: Props) {
         {/* ── Login link ── */}
         <View style={s.footer}>
           <Text style={s.footerText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation?.navigate("Login")} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.push("/(auth)/login")} activeOpacity={0.7}>
             <Text style={s.footerLink}>Log In</Text>
           </TouchableOpacity>
         </View>
