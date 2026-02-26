@@ -1,4 +1,5 @@
 import prisma from "../../db/prisma";
+
 export class ProductService {
   static async getById(productId: string) {
     return prisma.products.findUnique({
@@ -17,9 +18,9 @@ export class ProductService {
         description: "No Description Provided",
         price: 0,
         productionDate: new Date(),
-        pinataImageUrl: data.pinataImageUrl,
+        pinataImageUrl: data.pinataImageUrl ? [data.pinataImageUrl] : [],
         category: data.category,
-        farmerId: "dummy-farmer-id" // Placeholder
+        farmerId: "dummy-farmer-id"
       }
     });
   }
@@ -27,7 +28,7 @@ export class ProductService {
   static async updateImage(productId: string, pinataImageUrl: string) {
     return prisma.products.update({
       where: { id: productId },
-      data: { pinataImageUrl }
+      data: { pinataImageUrl: pinataImageUrl ? [pinataImageUrl] : [] }
     });
   }
 

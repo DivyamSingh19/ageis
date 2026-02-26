@@ -1,4 +1,3 @@
-// controllers/geminiVerification.controller.ts
 import axios from "axios";
 import { analyzeProductImage } from "../../config/gemini";
 import { SEASONALITY_MAP } from "../../rules/seasonality.rules";
@@ -19,11 +18,13 @@ export const verifyProductWithGemini = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    if (!product.pinataImageUrl) {
+    if (!product.pinataImageUrl || product.pinataImageUrl.length === 0) {
       return res.status(400).json({ error: "Product has no image URL" });
     }
 
-    const imageResponse = await axios.get(product.pinataImageUrl, {
+    const imageUrl = product.pinataImageUrl[0];
+
+    const imageResponse = await axios.get(imageUrl, {
       responseType: "arraybuffer"
     });
 
@@ -60,7 +61,7 @@ export const verifyProductWithGemini = async (req: Request, res: Response) => {
       isSeasonal: seasonalityValid,
       seasonMonths,
       reasoning: aiResult.notes,
-      aiRaw: aiResult // optional, useful for audits
+      aiRaw: aiResult
     });
   } catch (err: any) {
     console.error("Gemini verification error:", err.message);

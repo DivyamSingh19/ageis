@@ -1,102 +1,105 @@
-import { Request,Response } from "express"
+import { Request, Response } from "express"
 import { HTTPStatus } from "../../services/http/status"
 import prisma from "../../db/prisma"
-import { hashPassword,validatePassword,createToken } from "../../utils/tokens"
-export class AuthController{
-    register = async (req:Request,res:Response) => {
+import { hashPassword, validatePassword, createToken } from "../../utils/tokens"
+export class AuthController {
+    register = async (req: Request, res: Response) => {
         try {
-             const {name,email,password} = req.body
-             if(!name || !email || !password){
-                return res.status(HTTPStatus.BAD_REQUEST).json({message:"All fields are required"})
-             }    
-             const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-             if(!regex.test(email)){
-                return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid email"})
-             }
-             const existingFarmer = await prisma.farmer.findUnique({
-                where:{
+            const { name, email, password } = req.body
+            if (!name || !email || !password) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "All fields are required" })
+            }
+            const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+            if (!regex.test(email)) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "Invalid email" })
+            }
+            const existingFarmer = await prisma.farmer.findUnique({
+                where: {
                     email
-                }             
+                }
             })
-                if(existingFarmer){   
-                    return res.status(HTTPStatus.BAD_REQUEST).json({message:"Farmer already exists"})
+            if (existingFarmer) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "Farmer already exists" })
+            }
+            const hashedPassword = await hashPassword(password)
+            const farmer = await prisma.farmer.create({
+                data: {
+                    name,
+                    email,
+                    passwordHash: hashedPassword
                 }
-                const hashedPassword = await hashPassword(password)
-                const farmer = await prisma.farmer.create({
-                    data:{
-                        name,
-                        email,
-                        passwordHash:hashedPassword
-                    }
-                })
-                const token = await createToken(farmer.id)
-                if(!token){
-                    return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error creating token",token, email})
+            })
+            const token = await createToken(farmer.id)
+            if (!token) {
+                return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating token", token, email })
+            }
+            return res.status(HTTPStatus.CREATED).json({
+                message: "Farmer created successfully", token, data: {
+                    id: farmer.id,
+                    name: farmer.name,
+                    email: farmer.email,
+                    onboardingComplete: farmer.onboardingComplete
                 }
-                return res.status(HTTPStatus.CREATED).json({message:"Farmer created successfully",data:{
-                    token,
-                    farmer:{
-                        id:farmer.id,
-                        name:farmer.name,
-                        email:farmer.email
-                    }
-                }})
+            })
         } catch (error) {
             console.log(error);
-            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error creating farmer",error})
+            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating farmer", error })
         }
     }
-    login = async (req:Request,res:Response) => {
+    login = async (req: Request, res: Response) => {
         try {
-            const {email,password} = req.body
-            if(!email || !password){
-                return res.status(HTTPStatus.BAD_REQUEST).json({message:"All fields are required"})
-             }
-                const farmer = await prisma.farmer.findUnique({
-                    where:{
-                        email
-                    }
-                })
-                if(!farmer){
-                    return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid credentials"})
-                }
-                const isValidPassword = await validatePassword(password,farmer.passwordHash)
-                if(!isValidPassword){
-                    return res.status(HTTPStatus.BAD_REQUEST).json({message:"Invalid credentials"})
-                }
-                const token = await createToken(farmer.id)
-                if(!token){
-                    return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error creating token"})
-                }
-                return res.status(HTTPStatus.OK).json({message:"Logged in successfully",token,data:{
-                    id:farmer.id,
-                    name:farmer.name,
-                    email:farmer.email
-                }})
-
-        } catch (error) {
-            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error logging in",error})
-        }
-    }
-
-    me = async (req:Request,res:Response) => {
-        try {
-            const email = req.body
-            if(!email){
-                return res.status(HTTPStatus.BAD_REQUEST).json({message:"Farmer ID is required"})
+            const { email, password } = req.body
+            if (!email || !password) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "All fields are required" })
             }
             const farmer = await prisma.farmer.findUnique({
-                where:{
-                    email:email
+                where: {
+                    email
                 }
             })
-            if(!farmer){
-                return res.status(HTTPStatus.BAD_REQUEST).json({message:"Farmer not found"})
+            if (!farmer) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "Invalid credentials" })
             }
-            return res.status(HTTPStatus.OK).json({message:"Farmer found",farmer})  
-            
+            const isValidPassword = await validatePassword(password, farmer.passwordHash)
+            if (!isValidPassword) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "Invalid credentials" })
+            }
+            const token = await createToken(farmer.id)
+            if (!token) {
+                return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating token" })
+            }
+            return res.status(HTTPStatus.OK).json({
+                message: "Logged in successfully", token, data: {
+                    id: farmer.id,
+                    name: farmer.name,
+                    email: farmer.email,
+                    onboardingComplete: farmer.onboardingComplete
+                }
+            })
+
         } catch (error) {
-            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({message:"Error fetching farmer",error})
+            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: "Error logging in", error })
+        }
+    }
+
+    me = async (req: Request, res: Response) => {
+        try {
+            const email = req.body
+            if (!email) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "Farmer ID is required" })
+            }
+            const farmer = await prisma.farmer.findUnique({
+                where: {
+                    email: email
+                }
+            })
+            if (!farmer) {
+                return res.status(HTTPStatus.BAD_REQUEST).json({ message: "Farmer not found" })
+            }
+            return res.status(HTTPStatus.OK).json({ message: "Farmer found", farmer })
+
+        } catch (error) {
+            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching farmer", error })
         }
     }
 }

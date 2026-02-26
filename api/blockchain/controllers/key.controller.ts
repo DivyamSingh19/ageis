@@ -20,12 +20,12 @@ export class KeyController {
    */
   createKeyPair = async (req: Request, res: Response) => {
     try {
-      const { userId, publicKey, encryptedPrivateKey, meta } = req.body;
+      const { farmerId, publicKey, encryptedPrivateKey, meta } = req.body;
 
       // --- Input validation ---
-      if (!userId || !publicKey || !encryptedPrivateKey || !meta) {
+      if (!farmerId || !publicKey || !encryptedPrivateKey || !meta) {
         return res.status(HTTPStatus.BAD_REQUEST).json({
-          message: "userId, publicKey, encryptedPrivateKey and meta are required",
+          message: "farmerId, publicKey, encryptedPrivateKey and meta are required",
         });
       }
 
@@ -45,7 +45,7 @@ export class KeyController {
       }
 
       // Check for duplicate publicKey
-      const existing = await prisma.userKeys.findUnique({
+      const existing = await prisma.farmerKeys.findUnique({
         where: { publicKey },
       });
       if (existing) {
@@ -55,9 +55,9 @@ export class KeyController {
       }
 
       // Store — server is zero-knowledge, just a safe deposit box
-      const record = await prisma.userKeys.create({
+      const record = await prisma.farmerKeys.create({
         data: {
-          userId,
+          farmerId: farmerId,
           publicKey,
           encryptedPrivateKey,
           meta,
@@ -69,7 +69,7 @@ export class KeyController {
         data: {
           id: record.id,
           publicKey: record.publicKey,
-          userId: record.userId,
+          farmerId: record.farmerId,
           createdAt: record.createdAt,
         },
       });
