@@ -30,10 +30,10 @@ model User {
   email              String   @unique
   name               String?
   passwordHash       String
-  onboardingComplete Boolean  @default(false)
+   
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-
+  onboardingComplete Boolean  @default(false)
   orders  Order[]
 
   keys    UserKeys?
@@ -79,40 +79,6 @@ model FarmerProfile {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   farmer     Farmer   @relation(fields: [farmerId], references: [id])
-}
-
-model DeliveryAgent {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-   
-  profile DeliveryAgentProfile?
-}
-
-model DeliveryAgentProfile {
-  id          String        @id @default(uuid())
-  phoneNumber String
-  orderCount  Int           @default(0)
-  rating      Float         @default(0)
-  agentId     String        @unique
-  agent       DeliveryAgent @relation(fields: [agentId], references: [id])
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-   
-
-}
-
-model Admin {
-  id String @id @default(uuid())
-  email String @unique
-  name String
-  passwordHash String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Products {
@@ -182,7 +148,7 @@ model Delivery {
   id      String @id @default(uuid())
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id])
-  agentId String @unique
+  
    
   status  DeliveryStatus @default(Initialized)  
   createdAt DateTime @default(now())
