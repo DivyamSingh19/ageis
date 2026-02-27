@@ -34,17 +34,26 @@ export default function ProfileSetupScreen() {
     const getCurrentLocation = async () => {
         setGpsLoading(true);
         try {
+            // Check if location services are enabled globally
+            const enabled = await Location.hasServicesEnabledAsync();
+            if (!enabled) {
+                Alert.alert('Location Services Off', 'Please enable location services in your system settings.');
+                return;
+            }
+
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permission denied', 'Allow access to location to get your GPS coordinates.');
                 return;
             }
 
-            let loc = await Location.getCurrentPositionAsync({});
+            let loc = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Balanced,
+            });
             setLocation(`${loc.coords.latitude}, ${loc.coords.longitude}`);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            Alert.alert('Error', 'Failed to get current location.');
+            Alert.alert('Location Error', error.message || 'Failed to get current location.');
         } finally {
             setGpsLoading(false);
         }

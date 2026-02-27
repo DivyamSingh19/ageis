@@ -6,7 +6,7 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 export class OrderController {
     create = async (req: Request, res: Response) => {
         try {
-            const userId = req.userId;
+            const {userId,productId} = req.body;
             if (!userId) {
                 return res.status(HTTPStatus.UNAUTHORIZED).json({
                     success: false,
@@ -14,7 +14,7 @@ export class OrderController {
                 });
             }
 
-            const { productId } = req.body;
+           
             if (!productId) {
                 return res.status(HTTPStatus.BAD_REQUEST).json({
                     success: false,
@@ -57,7 +57,7 @@ export class OrderController {
 
                     const signature = await client.mintProductNft({
                         orderId: order.id,
-                        productName: product.name,
+                        productName: product.name.slice(0, 32),
                         metadataUri,
                         farmerWallet: new PublicKey(farmerKeys.publicKey)
                     }, mintKeypair);

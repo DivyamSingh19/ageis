@@ -75,7 +75,6 @@ app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
         const baseUrl = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.get("host")}`
         const image = product.pinataImageUrl?.[0] ?? null
 
-         
         return res.json({
             name: product.name,
             symbol: "AGEIS",
