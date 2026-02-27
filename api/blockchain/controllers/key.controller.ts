@@ -112,7 +112,7 @@ export class KeyController {
         });
       }
 
-      const record = await prisma.userKeys.findUnique({
+      const record = await prisma.farmerKeys.findUnique({
         where: { publicKey: publicKey as string },
       });
 
@@ -122,7 +122,7 @@ export class KeyController {
         });
       }
 
-      const updated = await prisma.userKeys.update({
+      const updated = await prisma.farmerKeys.update({
         where: { publicKey: publicKey as string },
         data: {
           encryptedPrivateKey,
@@ -154,18 +154,27 @@ export class KeyController {
    */
   getKeys = async (req: Request, res: Response) => {
     try {
-      const { publicKey } = req.params;
+      const publicKey = req.params.publicKey as string;
 
-      const isValid = await keyService.isValidSolanaPublicKey(publicKey as string);
-      if (!isValid) {
-        return res.status(HTTPStatus.BAD_REQUEST).json({
-          message: "Invalid Solana public key",
+      // Check if it's a UUID (likely farmerId) or a Solana address
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(publicKey);
+
+      let record: any;
+      if (isUUID) {
+        record = await prisma.farmerKeys.findUnique({
+          where: { farmerId: publicKey },
+        });
+      } else {
+        const isValid = await keyService.isValidSolanaPublicKey(publicKey);
+        if (!isValid) {
+          return res.status(HTTPStatus.BAD_REQUEST).json({
+            message: "Invalid Solana public key or farmer ID",
+          });
+        }
+        record = await prisma.farmerKeys.findUnique({
+          where: { publicKey },
         });
       }
-
-      const record = await prisma.userKeys.findUnique({
-        where: { publicKey: publicKey as string },
-      });
 
       if (!record) {
         return res.status(HTTPStatus.NOT_FOUND).json({
@@ -180,7 +189,7 @@ export class KeyController {
           publicKey: record.publicKey,
           encryptedPrivateKey: record.encryptedPrivateKey,
           meta: record.meta,           // { iv, salt, scheme } — client needs this to decrypt
-          userId: record.userId,
+          farmerId: record.farmerId,
           createdAt: record.createdAt,
           updatedAt: record.updatedAt,
         },
@@ -210,9 +219,9 @@ export class KeyController {
         });
       }
 
-      const record = await prisma.userKeys.findUnique({
+      const record = await prisma.farmerKeys.findUnique({
         where: { publicKey: publicKey as string },
-        select: { publicKey: true, userId: true, createdAt: true },
+        select: { publicKey: true, farmerId: true, createdAt: true },
       });
 
       if (!record) {
@@ -250,7 +259,7 @@ export class KeyController {
         });
       }
 
-      const record = await prisma.userKeys.findUnique({
+      const record = await prisma.farmerKeys.findUnique({
         where: { publicKey: publicKey as string },
       });
 
@@ -260,7 +269,7 @@ export class KeyController {
         });
       }
 
-      await prisma.userKeys.delete({ where: { publicKey: publicKey as string } });
+      await prisma.farmerKeys.delete({ where: { publicKey: publicKey as string } });
 
       return res.status(HTTPStatus.OK).json({
         message: "Key deleted successfully",

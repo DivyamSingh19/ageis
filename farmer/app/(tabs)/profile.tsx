@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +10,7 @@ const { width } = Dimensions.get('window');
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ProfileScreen() {
+    const router = useRouter();
     const { user, logout, token } = useAuth();
     const [profile, setProfile] = useState<any>(null);
     const [stats, setStats] = useState({
@@ -151,6 +153,7 @@ export default function ProfileScreen() {
                                 subtitle={shortPublicKey}
                                 iconBg="bg-green-500/10"
                                 iconColor="#13EC13"
+                                onPress={() => router.push('/wallet')}
                             />
 
                             <View className="h-[1px] bg-zinc-800/50 my-5" />
@@ -200,9 +203,9 @@ function StatCard({ value, label }: { value: string, label: string }) {
     );
 }
 
-function SettingRow({ icon, title, subtitle, iconBg, iconColor }: { icon: any, title: string, subtitle: string, iconBg: string, iconColor: string }) {
+function SettingRow({ icon, title, subtitle, iconBg, iconColor, onPress }: { icon: any, title: string, subtitle: string, iconBg: string, iconColor: string, onPress?: () => void }) {
     return (
-        <TouchableOpacity className="flex-row items-center">
+        <TouchableOpacity className="flex-row items-center" onPress={onPress}>
             <View className={`w-12 h-12 rounded-xl ${iconBg} items-center justify-center`}>
                 <Ionicons name={icon} size={22} color={iconColor} />
             </View>
