@@ -14,9 +14,10 @@ export class ProductController {
         productionDate,
         category,
         farmLocation,
+        farmerId
       } = req.body;
 
-      const farmerId = req.farmerId;
+ 
 
       if (!farmerId) {
         return res
@@ -201,7 +202,7 @@ getById = async (req: Request, res: Response) => {
 
 getNftInfo = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
 
     const product = await prisma.products.findUnique({
       where: { id },

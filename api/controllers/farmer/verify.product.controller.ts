@@ -41,19 +41,7 @@ export const verifyProductWithGemini = async (req: Request, res: Response) => {
       country: "India"
     });
 
-    // Local seasonality verification (authoritative)
-    const detectedKey = aiResult.identifiedItem?.toLowerCase();
-    const seasonMonths = SEASONALITY_MAP[detectedKey] || [];
-
-    const seasonalityValid =
-      seasonMonths.length > 0 &&
-      (seasonMonths.includes("All") ||
-        seasonMonths.length === aiResult.seasonMonths.length);
-
-    const matches =
-      aiResult.matchesProductName === true &&
-      aiResult.confidence >= 0.7 &&
-      seasonalityValid;
+    const matches = aiResult.verified === true;
 
     // If verified, mint the NFT (server-custodied) and persist mint address.
     let mint: { address: string; signature: string } | null = null;
@@ -116,13 +104,7 @@ export const verifyProductWithGemini = async (req: Request, res: Response) => {
     return res.json({
       productId,
       matches,
-      confidence: aiResult.confidence,
-      detectedItem: aiResult.identifiedItem,
-      variety: aiResult.variety,
-      isFruit: aiResult.isFruit,
-      isSeasonal: seasonalityValid,
-      seasonMonths,
-      reasoning: aiResult.notes,
+      reasoning: aiResult.reason,
       aiRaw: aiResult,
       mint,
     });
