@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native';
 import { useAuth } from '../../context/auth-context';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,6 +9,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function OrdersScreen() {
     const { token } = useAuth();
+    const router = useRouter();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -103,6 +105,7 @@ function OrderCard({ order }: { order: any }) {
         <TouchableOpacity
             className="bg-zinc-900/40 border border-zinc-800/50 rounded-3xl p-4 mb-4 flex-row items-center"
             activeOpacity={0.7}
+            onPress={() => router.push(`/order/${order.id}`)}
         >
             <View className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-800">
                 {order.product?.pinataImageUrl?.[0] ? (

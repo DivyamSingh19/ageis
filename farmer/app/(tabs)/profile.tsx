@@ -30,7 +30,7 @@ export default function ProfileScreen() {
         setLoading(true);
         try {
             // Fetch profile, keys (for wallet), and products (for batches calculation) in parallel
-            const [profileRes, keysRes, productsRes] = await Promise.all([
+            const [profileRes, keysRes, productsRes, ordersRes] = await Promise.all([
                 fetch(`${API_URL}/api/farmer-profile/get?farmerId=${user.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
@@ -39,30 +39,42 @@ export default function ProfileScreen() {
                 }),
                 fetch(`${API_URL}/api/farmer/products`, {
                     headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(`${API_URL}/api/farmer/orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
 
             const profileData = await profileRes.json();
             const keysData = await keysRes.json();
             const productsData = await productsRes.json();
+            const ordersData = await ordersRes.json();
 
             if (profileRes.ok) setProfile(profileData.profile);
             if (keysRes.ok && keysData.key) setPublicKey(keysData.key.publicKey);
 
+            let totalBatches = 0;
+            let verifiedRatio = 0;
+            let totalEarning = 0;
+
             if (productsRes.ok && productsData.products) {
                 const products = productsData.products;
-                const totalBatches = products.length;
+                totalBatches = products.length;
                 const verifiedCount = products.filter((p: any) => p.verified).length;
-                const verifiedRatio = totalBatches > 0 ? Math.round((verifiedCount / totalBatches) * 100) : 0;
-
-                // Mock earning for now as we don't have orders stats endpoint yet
-                // But user mentioned API returns adequate data, so maybe we can estimate or just use 0
-                setStats({
-                    totalBatches,
-                    verifiedRatio,
-                    earning: 2.4 // Hardcoded for demo to match mockup, or 0
-                });
+                verifiedRatio = totalBatches > 0 ? Math.round((verifiedCount / totalBatches) * 100) : 0;
             }
+
+            if (ordersRes.ok && ordersData.data) {
+                totalEarning = ordersData.data
+                    .filter((o: any) => o.status === 'DELIVERED')
+                    .reduce((acc: number, o: any) => acc + (o.product?.price * o.quantity || 0), 0);
+            }
+
+            setStats({
+                totalBatches,
+                verifiedRatio,
+                earning: totalEarning > 1000 ? (totalEarning / 1000).toFixed(1) + 'k' : totalEarning.toString()
+            } as any);
 
         } catch (error) {
             console.error('Error fetching profile data:', error);
