@@ -13,6 +13,7 @@ import router from "./routes/farmer/verify"
 import productRouter from "./routes/farmer/product"
 import prisma from "./db/prisma"
 import farmerProfileRouter from "./routes/farmer/profile"
+import farmerOrderRouter from "./routes/farmer/order"
 
 
 const app = express()
@@ -53,6 +54,7 @@ app.use("/api/farmer/auth", farmerAuthRouter)
 app.use("/api/farmer/keys", keyRouter)
 app.use("/api/farmer-profile", farmerProfileRouter)
 app.use("/api/farmer/products", productRouter)
+app.use("/api/farmer/orders", farmerOrderRouter)
 //gemini verification route
 app.use("/api/farmer", router)
 

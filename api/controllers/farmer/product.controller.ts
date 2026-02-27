@@ -17,7 +17,7 @@ export class ProductController {
         farmerId
       } = req.body;
 
- 
+
 
       if (!farmerId) {
         return res
@@ -77,7 +77,7 @@ export class ProductController {
 
   delete = async (req: Request, res: Response) => {
     try {
-      const  id  = req.body ;
+      const id = req.body;
       const farmerId = req.farmerId;
 
       if (!farmerId) {
@@ -114,112 +114,112 @@ export class ProductController {
   };
 
   update = async (req: Request, res: Response) => {
-  try {
-    const id = req.body
-    const farmerId = req.farmerId;
+    try {
+      const id = req.body
+      const farmerId = req.farmerId;
 
-    if (!farmerId) {
-      return res
-        .status(HTTPStatus.UNAUTHORIZED)
-        .json({ message: "Unauthorized" });
-    }
+      if (!farmerId) {
+        return res
+          .status(HTTPStatus.UNAUTHORIZED)
+          .json({ message: "Unauthorized" });
+      }
 
-    const product = await prisma.products.findUnique({ where: { id } });
+      const product = await prisma.products.findUnique({ where: { id } });
 
-    if (!product) {
-      return res
-        .status(HTTPStatus.NOT_FOUND)
-        .json({ message: "Product not found" });
-    }
+      if (!product) {
+        return res
+          .status(HTTPStatus.NOT_FOUND)
+          .json({ message: "Product not found" });
+      }
 
-    if (product.farmerId !== farmerId) {
-      return res
-        .status(HTTPStatus.FORBIDDEN)
-        .json({ message: "Forbidden: You do not own this product" });
-    }
+      if (product.farmerId !== farmerId) {
+        return res
+          .status(HTTPStatus.FORBIDDEN)
+          .json({ message: "Forbidden: You do not own this product" });
+      }
 
-    // Only name, description, and quantity are user-editable
-    const { name, description, quantity } = req.body;
+      // Only name, description, and quantity are user-editable
+      const { name, description, quantity } = req.body;
 
-    if (!name && !description && !quantity) {
-      return res
-        .status(HTTPStatus.BAD_REQUEST)
-        .json({ message: "At least one of name, description, or quantity must be provided" });
-    }
+      if (!name && !description && !quantity) {
+        return res
+          .status(HTTPStatus.BAD_REQUEST)
+          .json({ message: "At least one of name, description, or quantity must be provided" });
+      }
 
-    const updated = await prisma.products.update({
-      where: { id },
-      data: {
-        ...(name && { name }),
-        ...(description && { description }),
-        ...(quantity && { quantity: parseInt(quantity) }),
-      },
-      include: {
-        farmer: {
-          select: { name: true },
+      const updated = await prisma.products.update({
+        where: { id },
+        data: {
+          ...(name && { name }),
+          ...(description && { description }),
+          ...(quantity && { quantity: parseInt(quantity) }),
         },
-      },
-    });
-
-    return res
-      .status(HTTPStatus.OK)
-      .json({ message: "Product updated successfully", product: updated });
-  } catch (error) {
-    console.error("[ProductController.update]", error);
-    return res
-      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error" });
-  }
-};
-
-getById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.body;
-
-    const product = await prisma.products.findUnique({
-      where: { id },
-      include: {
-        farmer: {
-          select: { name: true },
+        include: {
+          farmer: {
+            select: { name: true },
+          },
         },
-      },
-    });
+      });
 
-    if (!product) {
       return res
-        .status(HTTPStatus.NOT_FOUND)
-        .json({ message: "Product not found" });
+        .status(HTTPStatus.OK)
+        .json({ message: "Product updated successfully", product: updated });
+    } catch (error) {
+      console.error("[ProductController.update]", error);
+      return res
+        .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
     }
+  };
 
-    return res.status(HTTPStatus.OK).json({ product });
-  } catch (error) {
-    console.error("[ProductController.getById]", error);
-    return res
-      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error" });
-  }
-};
+  getById = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.body;
 
-getNftInfo = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.body;
+      const product = await prisma.products.findUnique({
+        where: { id },
+        include: {
+          farmer: {
+            select: { name: true },
+          },
+        },
+      });
 
-    const product = await prisma.products.findUnique({
-      where: { id },
-      include: {
-        nft: true,
-      },
-    });
+      if (!product) {
+        return res
+          .status(HTTPStatus.NOT_FOUND)
+          .json({ message: "Product not found" });
+      }
 
-    if (!product) {
-      return res.status(HTTPStatus.NOT_FOUND).json({ message: "Product not found" });
+      return res.status(HTTPStatus.OK).json({ product });
+    } catch (error) {
+      console.error("[ProductController.getById]", error);
+      return res
+        .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
     }
+  };
 
-    const client = getAgeisClient();
-    const trace = await client.fetchProductTrace(product.id);
+  getNftInfo = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.body;
 
-    const onChainTrace = trace
-      ? {
+      const product = await prisma.products.findUnique({
+        where: { id },
+        include: {
+          nft: true,
+        },
+      });
+
+      if (!product) {
+        return res.status(HTTPStatus.NOT_FOUND).json({ message: "Product not found" });
+      }
+
+      const client = getAgeisClient();
+      const trace = await client.fetchProductTrace(product.id);
+
+      const onChainTrace = trace
+        ? {
           orderId: trace.orderId,
           nftMint: trace.nftMint.toBase58(),
           farmerWallet: trace.farmerWallet.toBase58(),
@@ -228,90 +228,91 @@ getNftInfo = async (req: Request, res: Response) => {
           createdAt: trace.createdAt.toString(),
           bump: trace.bump,
         }
-      : null;
+        : null;
 
-    const mintAddress = product.nft?.tokenId ?? onChainTrace?.nftMint ?? null;
+      const mintAddress = product.nft?.tokenId ?? onChainTrace?.nftMint ?? null;
 
-    return res.status(HTTPStatus.OK).json({
-      verified: product.verified,
-      mintAddress,
-      onChainTrace,
-    });
-  } catch (error) {
-    console.error("[ProductController.getNftInfo]", error);
-    return res
-      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error" });
-  }
-};
+      return res.status(HTTPStatus.OK).json({
+        verified: product.verified,
+        mintAddress,
+        onChainTrace,
+      });
+    } catch (error) {
+      console.error("[ProductController.getNftInfo]", error);
+      return res
+        .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
+    }
+  };
 
-all = async (req: Request, res: Response) => {
-  try {
-    const {
-      page = "1",
-      limit = "10",
-      category,
-      farmLocation,
-      minPrice,
-      maxPrice,
-      verified,
-      search,
-    } = req.query;
+  all = async (req: Request, res: Response) => {
+    try {
+      const {
+        page = "1",
+        limit = "10",
+        category,
+        farmLocation,
+        minPrice,
+        maxPrice,
+        verified,
+        search,
+      } = req.query;
 
-    const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
-    const skip = (pageNum - 1) * limitNum;
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const skip = (pageNum - 1) * limitNum;
 
-    const where: any = {
-      isActive: true,
-      ...(category && { category: category as string }),
-      ...(farmLocation && { farmLocation: farmLocation as string }),
-      ...(verified !== undefined && { verified: verified === "true" }),
-      ...(minPrice || maxPrice
-        ? {
+      const where: any = {
+        isActive: true,
+        farmerId: req.farmerId, // Only show products for the authenticated farmer
+        ...(category && { category: category as string }),
+        ...(farmLocation && { farmLocation: farmLocation as string }),
+        ...(verified !== undefined && { verified: verified === "true" }),
+        ...(minPrice || maxPrice
+          ? {
             price: {
               ...(minPrice && { gte: parseFloat(minPrice as string) }),
               ...(maxPrice && { lte: parseFloat(maxPrice as string) }),
             },
           }
-        : {}),
-      ...(search && {
-        OR: [
-          { name: { contains: search as string, mode: "insensitive" } },
-          { description: { contains: search as string, mode: "insensitive" } },
-        ],
-      }),
-    };
+          : {}),
+        ...(search && {
+          OR: [
+            { name: { contains: search as string, mode: "insensitive" } },
+            { description: { contains: search as string, mode: "insensitive" } },
+          ],
+        }),
+      };
 
-    const [products, total] = await Promise.all([
-      prisma.products.findMany({
-        where,
-        skip,
-        take: limitNum,
-        orderBy: { createdAt: "desc" },
-        include: {
-          farmer: {
-            select: { name: true },
+      const [products, total] = await Promise.all([
+        prisma.products.findMany({
+          where,
+          skip,
+          take: limitNum,
+          orderBy: { createdAt: "desc" },
+          include: {
+            farmer: {
+              select: { name: true },
+            },
           },
-        },
-      }),
-      prisma.products.count({ where }),
-    ]);
+        }),
+        prisma.products.count({ where }),
+      ]);
 
-    return res.status(HTTPStatus.OK).json({
-      products,
-      pagination: {
-        total,
-        page: pageNum,
-        limit: limitNum,
-        totalPages: Math.ceil(total / limitNum),
-      },
-    });
-  } catch (error) {
-    console.error("[ProductController.all]", error);
-    return res
-      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error" });
-  }
-};
+      return res.status(HTTPStatus.OK).json({
+        products,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      console.error("[ProductController.all]", error);
+      return res
+        .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
+    }
+  };
 }

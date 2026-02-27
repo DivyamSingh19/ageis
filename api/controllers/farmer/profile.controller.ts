@@ -49,7 +49,7 @@ export const createFarmerProfile = async (req: Request, res: Response) => {
 
 export const getFarmerProfile = async (req: Request, res: Response) => {
   try {
-    const { farmerId } = req.body;
+    const { farmerId } = req.query;
 
     if (!farmerId) {
       return res
@@ -58,7 +58,7 @@ export const getFarmerProfile = async (req: Request, res: Response) => {
     }
 
     const profile = await prisma.farmerProfile.findUnique({
-      where: { farmerId },
+      where: { farmerId: farmerId as string },
       include: { farmer: true },
     });
 
@@ -87,7 +87,7 @@ export const updateFarmerProfile = async (req: Request, res: Response) => {
         .json({ message: "farmerId is required" });
     }
 
-    
+
     const [existing, uploadedUrls] = await Promise.all([
       prisma.farmerProfile.findUnique({ where: { farmerId } }),
       req.file ? uploadFilesToPinata([req.file]) : Promise.resolve([]),

@@ -22,8 +22,8 @@ export default function TabLayout() {
         options={{ title: 'New' }}
       />
       <Tabs.Screen
-        name="insights"
-        options={{ title: 'Insights' }}
+        name="orders"
+        options={{ title: 'Orders' }}
       />
       <Tabs.Screen
         name="profile"

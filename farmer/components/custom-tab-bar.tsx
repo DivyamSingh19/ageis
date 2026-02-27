@@ -41,14 +41,14 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                     <Text className="text-gray-400 text-[10px] mt-1 uppercase font-bold tracking-tighter">Scan</Text>
                 </TouchableOpacity>
 
-                {/* Insights Tab */}
+                {/* Orders Tab */}
                 <TabItem
-                    label="Insights"
+                    label="Orders"
                     icon={<View className="bg-zinc-800 p-1 rounded-lg">
-                        <MaterialCommunityIcons name="chart-bar" size={24} color={state.index === 3 ? '#13EC13' : '#666'} />
+                        <MaterialCommunityIcons name="clipboard-list-outline" size={24} color={state.index === 3 ? '#13EC13' : '#666'} />
                     </View>}
                     active={state.index === 3}
-                    onPress={() => navigation.navigate('insights')}
+                    onPress={() => navigation.navigate('orders')}
                 />
 
                 {/* Profile Tab */}
