@@ -1,48 +1,31 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import "../../global.css"
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { CustomTabBar } from '@/components/custom-tab-bar';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
+      initialRouteName="index"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
         name="navigation"
-        options={{
-          title: 'Nav',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
-        }}
+        options={{ title: 'Nav' }}
       />
       <Tabs.Screen
         name="index"
-        options={{
-          title: 'Marketplace',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
-        }}
+        options={{ title: 'Marketplace' }}
       />
       <Tabs.Screen
         name="all-orders"
-        options={{
-          title: 'All Orders',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
-        }}
+        options={{ title: 'All Orders' }}
       />
       <Tabs.Screen
         name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
-        }}
+        options={{ title: 'Profile' }}
       />
     </Tabs>
   );

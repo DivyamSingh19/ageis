@@ -154,18 +154,27 @@ export class KeyController {
    */
   getKeys = async (req: Request, res: Response) => {
     try {
-      const { publicKey } = req.params;
+      const publicKey = req.params.publicKey as string;
 
-      const isValid = await keyService.isValidSolanaPublicKey(publicKey as string);
-      if (!isValid) {
-        return res.status(HTTPStatus.BAD_REQUEST).json({
-          message: "Invalid Solana public key",
+      // Check if it's a UUID (likely userId) or a Solana address
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(publicKey);
+
+      let record: any;
+      if (isUUID) {
+        record = await prisma.userKeys.findFirst({
+          where: { userId: publicKey },
+        });
+      } else {
+        const isValid = await keyService.isValidSolanaPublicKey(publicKey);
+        if (!isValid) {
+          return res.status(HTTPStatus.BAD_REQUEST).json({
+            message: "Invalid Solana public key or User ID",
+          });
+        }
+        record = await prisma.userKeys.findUnique({
+          where: { publicKey },
         });
       }
-
-      const record = await prisma.userKeys.findUnique({
-        where: { publicKey: publicKey as string },
-      });
 
       if (!record) {
         return res.status(HTTPStatus.NOT_FOUND).json({
@@ -179,7 +188,7 @@ export class KeyController {
           id: record.id,
           publicKey: record.publicKey,
           encryptedPrivateKey: record.encryptedPrivateKey,
-          meta: record.meta,           // { iv, salt, scheme } — client needs this to decrypt
+          meta: record.meta, // { iv, salt, scheme } — client needs this to decrypt
           userId: record.userId,
           createdAt: record.createdAt,
           updatedAt: record.updatedAt,
