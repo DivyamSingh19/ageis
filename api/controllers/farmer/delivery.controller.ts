@@ -214,11 +214,24 @@ export class DeliveryController {
                 });
             }
 
-            const nfcEntry = await prisma.orderNFC.upsert({
-                where: { orderId: orderId as string },
-                update: { nfcId: nfcId as string },
-                create: { orderId: orderId as string, nfcId: nfcId as string }
+            const existing = await prisma.orderNFC.findFirst({
+                where: { orderId: orderId as string } as any
             });
+
+            let nfcEntry;
+            if (existing) {
+                nfcEntry = await prisma.orderNFC.update({
+                    where: { id: (existing as any).id },
+                    data: { nfcId: nfcId as string }
+                });
+            } else {
+                nfcEntry = await prisma.orderNFC.create({
+                    data: {
+                        Order: { connect: { id: orderId as string } },
+                        nfcId: nfcId as string
+                    } as any
+                });
+            }
 
             return res.status(HTTPStatus.OK).json({
                 success: true,
