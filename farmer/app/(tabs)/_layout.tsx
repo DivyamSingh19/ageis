@@ -1,52 +1,50 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { CustomTabBar } from '@/components/custom-tab-bar';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarStyle: {
-          backgroundColor: '#000000',
-          borderTopColor: '#333',
-        },
       }}>
       <Tabs.Screen
         name="navigation"
-        options={{
-          title: 'Nav',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
-        }}
+        options={{ title: 'Nav' }}
       />
       <Tabs.Screen
-        name="marketplace"
-        options={{
-          title: 'Marketplace',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
-        }}
+        name="history"
+        options={{ title: 'History' }}
       />
       <Tabs.Screen
         name="new-product"
-        options={{
-          title: 'New',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.circle.fill" color={color} />,
-        }}
+        options={{ title: 'New' }}
+      />
+      <Tabs.Screen
+        name="insights"
+        options={{ title: 'Insights' }}
       />
       <Tabs.Screen
         name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
-        }}
+        options={{ title: 'Settings' }}
+      />
+      <Tabs.Screen
+        name="scan"
+        options={{ title: 'Scan' }}
+      />
+      {/* Marketplace is hidden or removed in favor of the new design */}
+      <Tabs.Screen
+        name="marketplace"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="main"
+        options={{ href: null }}
       />
     </Tabs>
   );

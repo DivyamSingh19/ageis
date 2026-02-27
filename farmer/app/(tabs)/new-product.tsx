@@ -16,18 +16,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth-context";
 
 // ─── Mock icons (replace with lucide-react-native or @expo/vector-icons) ──────
-const Icon = ({ name, size = 16, color = "#22c55e" }: { name: string; size?: number; color?: string }) => (
+const Icon = ({ name, size = 16, color = "#13EC13" }: { name: string; size?: number; color?: string }) => (
   <Text style={{ fontSize: size, color }}>{
     name === "leaf" ? "🌿" :
-    name === "calendar" ? "📅" :
-    name === "pin" ? "📍" :
-    name === "gps" ? "🎯" :
-    name === "shield" ? "🛡️" :
-    name === "image" ? "🖼️" :
-    name === "tag" ? "🏷️" :
-    name === "back" ? "‹" :
-    name === "plus" ? "＋" :
-    name === "x" ? "✕" : "•"
+      name === "calendar" ? "📅" :
+        name === "pin" ? "📍" :
+          name === "gps" ? "🎯" :
+            name === "shield" ? "🛡️" :
+              name === "image" ? "🖼️" :
+                name === "tag" ? "🏷️" :
+                  name === "back" ? "‹" :
+                    name === "plus" ? "＋" :
+                      name === "x" ? "✕" : "•"
   }</Text>
 );
 
@@ -41,7 +41,7 @@ const StepDot = ({ active, done }: { active?: boolean; done?: boolean }) => (
       width: active ? 28 : 10,
       height: 4,
       borderRadius: 2,
-      backgroundColor: done || active ? "#22c55e" : "#2d2d2d",
+      backgroundColor: done || active ? "#13EC13" : "#2d2d2d",
       marginHorizontal: 3,
     }}
   />
@@ -246,7 +246,7 @@ export default function NewProduceScreen({ navigation }: any) {
         </View>
 
         <ScrollView
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 220 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -334,7 +334,7 @@ export default function NewProduceScreen({ navigation }: any) {
                 style={{
                   backgroundColor: "#111827",
                   borderWidth: 1,
-                  borderColor: showCategoryPicker ? "#22c55e" : "#1f2937",
+                  borderColor: showCategoryPicker ? "#13EC13" : "#1f2937",
                   borderRadius: 14,
                   paddingHorizontal: 16,
                   paddingVertical: 14,
@@ -366,7 +366,7 @@ export default function NewProduceScreen({ navigation }: any) {
               style={{
                 backgroundColor: "#111827",
                 borderWidth: 1,
-                borderColor: "#22c55e",
+                borderColor: "#13EC13",
                 borderRadius: 14,
                 marginTop: -12,
                 marginBottom: 20,
@@ -393,7 +393,7 @@ export default function NewProduceScreen({ navigation }: any) {
                 >
                   <Text style={{ color: "#f9fafb", fontSize: 15 }}>{cat}</Text>
                   {selectedCategory === cat && (
-                    <Text style={{ color: "#22c55e", fontSize: 14 }}>✓</Text>
+                    <Text style={{ color: "#13EC13", fontSize: 14 }}>✓</Text>
                   )}
                 </TouchableOpacity>
               ))}
@@ -444,7 +444,7 @@ export default function NewProduceScreen({ navigation }: any) {
               }}
             >
               <Icon name="gps" size={16} />
-              <Text style={{ color: "#22c55e", fontWeight: "700", fontSize: 15 }}>
+              <Text style={{ color: "#13EC13", fontWeight: "700", fontSize: 15 }}>
                 Get Current GPS
               </Text>
             </TouchableOpacity>
@@ -466,7 +466,7 @@ export default function NewProduceScreen({ navigation }: any) {
                       height: 90,
                       borderRadius: 12,
                       borderWidth: 1,
-                      borderColor: "#22c55e",
+                      borderColor: "#13EC13",
                     }}
                   />
                   <TouchableOpacity
@@ -504,7 +504,7 @@ export default function NewProduceScreen({ navigation }: any) {
                     gap: 4,
                   }}
                 >
-                  <Text style={{ color: "#22c55e", fontSize: 22 }}>＋</Text>
+                  <Text style={{ color: "#13EC13", fontSize: 22 }}>＋</Text>
                   <Text style={{ color: "#4b5563", fontSize: 11 }}>Add photo</Text>
                 </TouchableOpacity>
               )}
@@ -529,7 +529,7 @@ export default function NewProduceScreen({ navigation }: any) {
           >
             <Icon name="shield" size={20} />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: "#22c55e", fontWeight: "700", fontSize: 14, marginBottom: 4 }}>
+              <Text style={{ color: "#13EC13", fontWeight: "700", fontSize: 14, marginBottom: 4 }}>
                 Blockchain Verification
               </Text>
               <Text style={{ color: "#4b7a5e", fontSize: 13, lineHeight: 19 }}>
@@ -547,9 +547,8 @@ export default function NewProduceScreen({ navigation }: any) {
             left: 0,
             right: 0,
             backgroundColor: "#0a0a0a",
-            paddingHorizontal: 20,
-            paddingTop: 12,
-            paddingBottom: 32,
+            paddingBottom: 40,
+            marginBottom: 100,
             borderTopWidth: 1,
             borderTopColor: "#111827",
           }}
@@ -558,12 +557,12 @@ export default function NewProduceScreen({ navigation }: any) {
             onPress={handleSubmit}
             disabled={submitting}
             style={{
-              backgroundColor: submitting ? "#16a34a" : "#22c55e",
+              backgroundColor: submitting ? "#0a5d2c" : "#13EC13",
               borderRadius: 16,
               paddingVertical: 17,
               alignItems: "center",
               justifyContent: "center",
-              shadowColor: "#22c55e",
+              shadowColor: "#13EC13",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.35,
               shadowRadius: 12,

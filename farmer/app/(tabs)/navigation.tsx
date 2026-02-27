@@ -29,7 +29,7 @@ export default function FarmerNavigationHub() {
         <ScrollView className="flex-1 bg-black p-4">
             <View className="mb-6">
                 <Text className="text-3xl font-bold text-white">Ageis Farmer</Text>
-                
+
             </View>
 
             <View className="space-y-3">
@@ -40,8 +40,8 @@ export default function FarmerNavigationHub() {
                         className="bg-[#1a1a1a] p-4 rounded-xl border border-white/10 shadow-sm active:bg-[#2a2a2a]"
                     >
                         <View className="flex-row justify-between items-center">
-                            <Text className="text-lg font-semibold text-white">{link.name}</Text>
-                            <Text className="text-green-500 font-medium">{link.href}</Text>
+                            <Text style={{ color: '#13EC13' }} className="text-lg font-semibold">{link.name}</Text>
+                            <Text style={{ color: '#13EC13', opacity: 0.8 }} className="font-medium">{link.href}</Text>
                         </View>
                     </TouchableOpacity>
                 ))}
@@ -56,7 +56,7 @@ export default function FarmerNavigationHub() {
                     </View>
                 </TouchableOpacity>
             </View>
-            <View className="h-10" />
+            <View className="h-40" />
         </ScrollView>
     );
 }

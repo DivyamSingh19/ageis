@@ -93,9 +93,9 @@ export default function CreateWalletScreen() {
 
             {/* Progress Indicator */}
             <View className="flex-row justify-center gap-2 mb-8">
-                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
-                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
-                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
+                <View style={{ backgroundColor: '#13EC13' }} className="h-1.5 w-12 rounded-full" />
+                <View style={{ backgroundColor: '#13EC13' }} className="h-1.5 w-12 rounded-full" />
+                <View style={{ backgroundColor: '#13EC13' }} className="h-1.5 w-12 rounded-full" />
             </View>
 
             <View className="items-center">
@@ -110,8 +110,8 @@ export default function CreateWalletScreen() {
                 <Pressable
                     onPress={createWallet}
                     disabled={loading}
-                    className="bg-green-500 w-full py-5 rounded-2xl flex-row items-center justify-center mb-6"
-                    style={{ opacity: loading ? 0.5 : 1 }}
+                    style={{ backgroundColor: '#13EC13', opacity: loading ? 0.5 : 1 }}
+                    className="w-full py-5 rounded-2xl flex-row items-center justify-center mb-6"
                 >
                     {loading ? (
                         <ActivityIndicator color="#fff" />
@@ -129,10 +129,10 @@ export default function CreateWalletScreen() {
 
                 {publicKey && (
                     <View className="bg-green-900/40 p-4 rounded-xl w-full mb-4">
-                        <Text className="text-green-400 font-bold mb-1">
+                        <Text style={{ color: '#13EC13' }} className="font-bold mb-1">
                             Wallet Created!
                         </Text>
-                        <Text className="text-green-300 text-xs" selectable>
+                        <Text style={{ color: '#13EC13' }} className="text-xs" selectable>
                             Public Key: {publicKey}
                         </Text>
                     </View>

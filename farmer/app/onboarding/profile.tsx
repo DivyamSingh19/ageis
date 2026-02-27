@@ -105,7 +105,7 @@ export default function ProfileSetupScreen() {
 
             {/* Progress Indicator */}
             <View className="flex-row justify-center gap-2 mb-8">
-                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
+                <View style={{ backgroundColor: '#13EC13' }} className="h-1.5 w-12 rounded-full" />
                 <View className="h-1.5 w-12 bg-gray-800 rounded-full" />
                 <View className="h-1.5 w-12 bg-gray-800 rounded-full" />
             </View>
@@ -127,7 +127,7 @@ export default function ProfileSetupScreen() {
             <View className="mb-6">
                 <Text className="text-gray-400 text-xs font-bold mb-2 uppercase tracking-widest">Farm Location</Text>
                 <View className="flex-row items-center bg-zinc-900 rounded-2xl border border-zinc-800 px-4 py-1">
-                    <Ionicons name="location" size={20} color="#39ff14" />
+                    <Ionicons name="location" size={20} color="#13EC13" />
                     <TextInput
                         className="flex-1 text-white p-3 text-base"
                         placeholder="Coordinates or Address"
@@ -139,14 +139,14 @@ export default function ProfileSetupScreen() {
                 <TouchableOpacity
                     onPress={getCurrentLocation}
                     disabled={gpsLoading}
-                    className="flex-row items-center justify-center mt-3 bg-green-500/10 border border-green-500/30 py-4 rounded-2xl"
+                    className="flex-row items-center justify-center mt-3 bg-[#13EC13]/10 border border-[#13EC13]/30 py-4 rounded-2xl"
                 >
                     {gpsLoading ? (
-                        <ActivityIndicator color="#39ff14" />
+                        <ActivityIndicator color="#13EC13" />
                     ) : (
                         <>
-                            <Ionicons name="locate" size={20} color="#39ff14" />
-                            <Text className="text-green-500 font-bold ml-2">Get Current GPS</Text>
+                            <Ionicons name="locate" size={20} color="#13EC13" />
+                            <Text style={{ color: '#13EC13' }} className="font-bold ml-2">Get Current GPS</Text>
                         </>
                     )}
                 </TouchableOpacity>
@@ -170,7 +170,7 @@ export default function ProfileSetupScreen() {
             </View>
 
             <View className="bg-green-500/5 border border-green-500/20 p-4 rounded-2xl flex-row items-center mb-10">
-                <Ionicons name="shield-checkmark" size={24} color="#39ff14" />
+                <Ionicons name="shield-checkmark" size={24} color="#13EC13" />
                 <View className="ml-3 flex-1">
                     <Text className="text-white font-bold text-sm">Blockchain Verification</Text>
                     <Text className="text-gray-500 text-xs">This data will be encrypted and recorded on-chain for transparent supply chain tracking.</Text>
@@ -180,7 +180,8 @@ export default function ProfileSetupScreen() {
             <TouchableOpacity
                 onPress={handleNext}
                 disabled={loading}
-                className="bg-green-500 w-full py-5 rounded-2xl flex-row items-center justify-center mb-10"
+                style={{ backgroundColor: '#13EC13' }}
+                className="w-full py-5 rounded-2xl flex-row items-center justify-center mb-10"
             >
                 {loading ? (
                     <ActivityIndicator color="black" />
