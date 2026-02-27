@@ -1,45 +1,252 @@
+import { Request, Response } from "express";
 import prisma from "../../db/prisma";
-import { Request,Response } from "express";
 import { HTTPStatus } from "../../services/http/status";
+import { uploadFilesToPinata } from "../../services/products/upload.image.service";
 
-export class ProfileController{
-    create = async (req:Request,res:Response)=>{
-        try {
-            const farmerId = req.farmerId;
-            if (!farmerId) {
-                return res.status(HTTPStatus.UNAUTHORIZED).json({
-                    success: false,
-                    message: "Farmer ID not found in request"
-                });
-            }
+// ─────────────────────────────────────────────
+// CREATE Farmer Profile
+// POST /api/farmer-profile/create
+// body: { farmerId, bio?, location }
+// file: certificate (via multer, single)
+// ─────────────────────────────────────────────
+export const createFarmerProfile = async (req: Request, res: Response) => {
+  try {
+    const { farmerId, bio, location } = req.body;
 
-            const { location } = req.body;
-            if (!location) {
-                return res.status(HTTPStatus.BAD_REQUEST).json({
-                    success: false,
-                    message: "Location is required"
-                });
-            }
-
-            const profile = await prisma.farmerProfile.create({
-                data: {
-                    farmerId,
-                    trustScore:0,
-                    location:location
-                }
-            });
-
-            return res.status(HTTPStatus.CREATED).json({
-                success: true,
-                message: "Profile created successfully",
-                data: profile
-            });
-        } catch (error) {
-            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message: "Failed to create profile",
-                error: (error as Error).message
-            });
-        }
+    if (!farmerId || !location) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "farmerId and location are required" });
     }
-}
+
+    const existing = await prisma.farmerProfile.findUnique({
+      where: { farmerId },
+    });
+
+    if (existing) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "Profile already exists for this farmer" });
+    }
+
+    let certificateUrl: string | null = null;
+
+    if (req.file) {
+      const urls = await uploadFilesToPinata([req.file]);
+      certificateUrl = urls[0] ?? null;
+    }
+
+    const profile = await prisma.farmerProfile.create({
+      data: {
+        farmerId,
+        bio: bio || null,
+        location,
+        certificateUrl,
+      },
+    });
+
+    return res
+      .status(HTTPStatus.CREATED)
+      .json({ message: "Farmer profile created successfully", profile });
+  } catch (error) {
+    console.error("[FarmerProfileController.create]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};
+
+// ─────────────────────────────────────────────
+// GET Farmer Profile
+// GET /api/farmer-profile/get
+// body: { farmerId }
+// ─────────────────────────────────────────────
+export const getFarmerProfile = async (req: Request, res: Response) => {
+  try {
+    const { farmerId } = req.body;
+
+    if (!farmerId) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "farmerId is required" });
+    }
+
+    const profile = await prisma.farmerProfile.findUnique({
+      where: { farmerId },
+      include: { farmer: true },
+    });
+
+    if (!profile) {
+      return res
+        .status(HTTPStatus.NOT_FOUND)
+        .json({ message: "Farmer profile not found" });
+    }
+
+    return res.status(HTTPStatus.OK).json({ profile });
+  } catch (error) {
+    console.error("[FarmerProfileController.get]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};
+
+// ─────────────────────────────────────────────
+// UPDATE Farmer Profile
+// PUT /api/farmer-profile/update
+// body: { farmerId, bio?, location? }
+// file: certificate (via multer, optional)
+// ─────────────────────────────────────────────
+export const updateFarmerProfile = async (req: Request, res: Response) => {
+  try {
+    const { farmerId, bio, location } = req.body;
+
+    if (!farmerId) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "farmerId is required" });
+    }
+
+    const existing = await prisma.farmerProfile.findUnique({
+      where: { farmerId },
+    });
+
+    if (!existing) {
+      return res
+        .status(HTTPStatus.NOT_FOUND)
+        .json({ message: "Farmer profile not found" });
+    }
+
+    let certificateUrl: string | null = existing.certificateUrl ?? null;
+
+    if (req.file) {
+      const urls = await uploadFilesToPinata([req.file]);
+      certificateUrl = urls[0] ?? certificateUrl;
+    }
+
+    const updated = await prisma.farmerProfile.update({
+      where: { farmerId },
+      data: {
+        ...(bio !== undefined && { bio }),
+        ...(location !== undefined && { location }),
+        certificateUrl,
+      },
+    });
+
+    return res
+      .status(HTTPStatus.OK)
+      .json({ message: "Farmer profile updated successfully", profile: updated });
+  } catch (error) {
+    console.error("[FarmerProfileController.update]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};
+
+// ─────────────────────────────────────────────
+// UPDATE Trust Score
+// PATCH /api/farmer-profile/trust-score
+// body: { farmerId, trustScore }
+// ─────────────────────────────────────────────
+export const updateTrustScore = async (req: Request, res: Response) => {
+  try {
+    const { farmerId, trustScore } = req.body;
+
+    if (!farmerId || trustScore === undefined || isNaN(Number(trustScore))) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "farmerId and a valid trustScore are required" });
+    }
+
+    const updated = await prisma.farmerProfile.update({
+      where: { farmerId },
+      data: { trustScore: Number(trustScore) },
+    });
+
+    return res
+      .status(HTTPStatus.OK)
+      .json({ message: "Trust score updated successfully", profile: updated });
+  } catch (error) {
+    console.error("[FarmerProfileController.updateTrustScore]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};
+
+// ─────────────────────────────────────────────
+// UPDATE Rating
+// PATCH /api/farmer-profile/rating
+// body: { farmerId, rating }
+// ─────────────────────────────────────────────
+export const updateRating = async (req: Request, res: Response) => {
+  try {
+    const { farmerId, rating } = req.body;
+
+    if (!farmerId || rating === undefined || isNaN(Number(rating))) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "farmerId and a valid rating are required" });
+    }
+
+    const ratingNum = Number(rating);
+    if (ratingNum < 0 || ratingNum > 5) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "Rating must be between 0 and 5" });
+    }
+
+    const updated = await prisma.farmerProfile.update({
+      where: { farmerId },
+      data: { rating: ratingNum },
+    });
+
+    return res
+      .status(HTTPStatus.OK)
+      .json({ message: "Rating updated successfully", profile: updated });
+  } catch (error) {
+    console.error("[FarmerProfileController.updateRating]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};
+
+// ─────────────────────────────────────────────
+// DELETE Farmer Profile
+// DELETE /api/farmer-profile/delete
+// body: { farmerId }
+// ─────────────────────────────────────────────
+export const deleteFarmerProfile = async (req: Request, res: Response) => {
+  try {
+    const { farmerId } = req.body;
+
+    if (!farmerId) {
+      return res
+        .status(HTTPStatus.BAD_REQUEST)
+        .json({ message: "farmerId is required" });
+    }
+
+    const existing = await prisma.farmerProfile.findUnique({
+      where: { farmerId },
+    });
+
+    if (!existing) {
+      return res
+        .status(HTTPStatus.NOT_FOUND)
+        .json({ message: "Farmer profile not found" });
+    }
+
+    await prisma.farmerProfile.delete({ where: { farmerId } });
+
+    return res
+      .status(HTTPStatus.OK)
+      .json({ message: "Farmer profile deleted successfully" });
+  } catch (error) {
+    console.error("[FarmerProfileController.delete]", error);
+    return res
+      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error" });
+  }
+};

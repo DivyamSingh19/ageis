@@ -1,7 +1,9 @@
 import prisma from "../../db/prisma";
-import { Request,Response } from "express";
+import { Request, Response } from "express";
 import { HTTPStatus } from "../../services/http/status";
-export class OrderController{
+import { getAgeisClient } from "../../blockchain/server.client";
+import { Keypair, PublicKey } from "@solana/web3.js";
+export class OrderController {
     create = async (req: Request, res: Response) => {
         try {
             const userId = req.userId;
@@ -35,15 +37,51 @@ export class OrderController{
                 data: {
                     userId,
                     productId,
-                    farmerId:product.farmerId,
-                    
-                    quantity:1
+                    farmerId: product.farmerId,
+
+                    quantity: 1
                 }
             });
 
+            // --- Blockchain NFT Minting ---
+            try {
+                const farmerKeys = await prisma.farmerKeys.findUnique({
+                    where: { farmerId: product.farmerId }
+                });
+
+                if (farmerKeys) {
+                    const client = getAgeisClient();
+                    const mintKeypair = Keypair.generate();
+                    const baseUrl = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.get("host")}`;
+                    const metadataUri = `${baseUrl}/api/metadata/products/${productId}`;
+
+                    const signature = await client.mintProductNft({
+                        orderId: order.id,
+                        productName: product.name,
+                        metadataUri,
+                        farmerWallet: new PublicKey(farmerKeys.publicKey)
+                    }, mintKeypair);
+
+                    await prisma.orderNFT.create({
+                        data: {
+                            id: order.id,
+                            tokenId: mintKeypair.publicKey.toBase58(),
+                            signature: signature
+                        }
+                    });
+
+                    console.log(`[OrderController] NFT minted for order ${order.id}: ${signature}`);
+                } else {
+                    console.warn(`[OrderController] Farmer keys not found for farmer ${product.farmerId}. Skipping NFT mint.`);
+                }
+            } catch (blockchainError) {
+                console.error("[OrderController] Blockchain NFT minting failed:", blockchainError);
+                // We don't fail the entire request if NFT minting fails, but we log it.
+            }
+
             return res.status(HTTPStatus.CREATED).json({
                 success: true,
-                message: "Order created successfully",  
+                message: "Order created successfully",
 
                 data: order
             });
@@ -69,9 +107,9 @@ export class OrderController{
                 where: { userId },
                 include: {
                     product: true,
-                    nfc:true,
-                    nft:true,
-                    delivery:true 
+                    nfc: true,
+                    nft: true,
+                    delivery: true
                 }
             });
 
@@ -118,7 +156,7 @@ export class OrderController{
 
             const updatedOrder = await prisma.order.update({
                 where: { id: orderId },
-                data: { status: "CANCELED"}
+                data: { status: "CANCELED" }
             });
 
             return res.status(HTTPStatus.OK).json({

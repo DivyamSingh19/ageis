@@ -147,6 +147,7 @@ model OrderNFC {
 model OrderNFT {
   id        String   @id @default(uuid())
   tokenId   String   @unique
+  signature String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Order     Order    @relation(fields: [id], references: [id])
