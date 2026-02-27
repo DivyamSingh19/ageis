@@ -11,6 +11,7 @@ import { router as userProfileRouter } from "./routes/user/profile"
 import { router as userOrderRouter } from "./routes/user/order"
 import router from "./routes/farmer/verify"
 import productRouter from "./routes/farmer/product"
+import { router as userNFCRouter } from "./routes/user/nfc"
 import prisma from "./db/prisma"
 import farmerProfileRouter from "./routes/farmer/profile"
 import farmerOrderRouter from "./routes/farmer/order"
@@ -111,6 +112,7 @@ app.use("/api/user/auth", userAuthRouter)
 app.use("/api/user/keys", userKeyRouter)
 app.use("/api/user/profile", userProfileRouter)
 app.use("/api/user/order", userOrderRouter)
+app.use("/api/user/nfc", userNFCRouter)
 
 
 

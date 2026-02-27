@@ -1,1 +1,11 @@
 node_modules
+dist
+.env
+.gitignore
+.dockerignore
+*.md
+.git
+.vscode
+.excalidraw
+bun.lock
+package-lock.json*
