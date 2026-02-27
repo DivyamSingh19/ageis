@@ -56,11 +56,7 @@ export const createFarmerProfile = async (req: Request, res: Response) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// GET Farmer Profile
-// GET /api/farmer-profile/get
-// body: { farmerId }
-// ─────────────────────────────────────────────
+
 export const getFarmerProfile = async (req: Request, res: Response) => {
   try {
     const { farmerId } = req.body;
