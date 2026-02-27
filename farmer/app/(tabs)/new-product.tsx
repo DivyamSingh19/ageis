@@ -9,8 +9,11 @@ import {
   Platform,
   KeyboardAvoidingView,
   StatusBar,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/auth-context";
 
 // ─── Mock icons (replace with lucide-react-native or @expo/vector-icons) ──────
 const Icon = ({ name, size = 16, color = "#22c55e" }: { name: string; size?: number; color?: string }) => (
@@ -82,8 +85,11 @@ const inputStyle = {
   alignItems: "center" as const,
 };
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function NewProduceScreen({ navigation }: any) {
+  const { user, token } = useAuth();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -96,6 +102,7 @@ export default function NewProduceScreen({ navigation }: any) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const set = (key: string, val: string) => setForm((p) => ({ ...p, [key]: val }));
 
@@ -106,6 +113,84 @@ export default function NewProduceScreen({ navigation }: any) {
   };
 
   const removeImage = (idx: number) => setImages((p) => p.filter((_, i) => i !== idx));
+
+  const handleSubmit = async () => {
+    if (!user?.id) {
+      Alert.alert("Not signed in", "Please log in again before creating a product.");
+      return;
+    }
+
+    if (!form.name.trim() || !form.description.trim() || !form.price || !form.productionDate) {
+      Alert.alert("Missing fields", "Please fill in name, description, price and production date.");
+      return;
+    }
+
+    if (!form.category) {
+      Alert.alert("Category required", "Please select a category for your produce.");
+      return;
+    }
+
+    if (images.length === 0) {
+      Alert.alert("Images required", "Please add at least one product image.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const formData = new FormData();
+      formData.append("name", form.name.trim());
+      formData.append("description", form.description.trim());
+      formData.append("price", String(form.price));
+      formData.append("productionDate", form.productionDate);
+      formData.append("category", form.category);
+      formData.append("farmLocation", form.farmLocation);
+      formData.append("farmerId", user.id);
+
+      images.forEach((uri, index) => {
+        formData.append(
+          "files",
+          {
+            uri,
+            name: `product-image-${index}.jpg`,
+            type: "image/jpeg",
+          } as any
+        );
+      });
+
+      const response = await fetch(`${API_URL}/api/farmer/products`, {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        Alert.alert(
+          "Failed to create product",
+          (data && (data.message as string)) || "Something went wrong while saving your produce."
+        );
+        return;
+      }
+
+      Alert.alert("Success", "Your product has been created.", [
+        {
+          text: "OK",
+          onPress: () => {
+            navigation?.goBack?.();
+          },
+        },
+      ]);
+    } catch (error) {
+      console.error("[NewProduceScreen.handleSubmit]", error);
+      Alert.alert("Network error", "Unable to reach the server. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }}>
@@ -470,11 +555,10 @@ export default function NewProduceScreen({ navigation }: any) {
           }}
         >
           <TouchableOpacity
-            onPress={() => {
-              // Navigate to next step
-            }}
+            onPress={handleSubmit}
+            disabled={submitting}
             style={{
-              backgroundColor: "#22c55e",
+              backgroundColor: submitting ? "#16a34a" : "#22c55e",
               borderRadius: 16,
               paddingVertical: 17,
               alignItems: "center",
@@ -486,9 +570,13 @@ export default function NewProduceScreen({ navigation }: any) {
               elevation: 8,
             }}
           >
-            <Text style={{ color: "#000", fontSize: 16, fontWeight: "800", letterSpacing: 0.3 }}>
-              Next →
-            </Text>
+            {submitting ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text style={{ color: "#000", fontSize: 16, fontWeight: "800", letterSpacing: 0.3 }}>
+                Publish Produce
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

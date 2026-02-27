@@ -16,7 +16,12 @@ datasource db {
 }
 
 
-
+enum OrderStatus{
+  PLACED
+  PENDING
+  COMPLETED
+  CANCELED
+}
 
 
 enum DeliveryStatus {
@@ -117,6 +122,7 @@ model Order {
   userId    String
   farmerId  String
   productId String
+  status    OrderStatus @default(PLACED)
   quantity  Float
   user     User      @relation(fields: [userId], references: [id])
   farmer   Farmer    @relation(fields: [farmerId], references: [id])
