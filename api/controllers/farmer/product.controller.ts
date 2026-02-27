@@ -249,7 +249,7 @@ export class ProductController {
     try {
       const {
         page = "1",
-        limit = "10",
+        limit = "100",
         category,
         farmLocation,
         minPrice,
@@ -263,7 +263,6 @@ export class ProductController {
       const skip = (pageNum - 1) * limitNum;
 
       const where: any = {
-        isActive: true,
         farmerId: req.farmerId, // Only show products for the authenticated farmer
         ...(category && { category: category as string }),
         ...(farmLocation && { farmLocation: farmLocation as string }),

@@ -15,7 +15,7 @@ export default function HistoryScreen() {
     const fetchProducts = async () => {
         if (!token) return;
         try {
-            const response = await fetch(`${API_URL}/api/farmer/products`, {
+            const response = await fetch(`${API_URL}/api/farmer/products?limit=100`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
