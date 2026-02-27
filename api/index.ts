@@ -8,6 +8,7 @@ import { router as userAuthRouter } from "./routes/user/auth"
 import keyRouter from "./blockchain/routes/key.routes"
 import userKeyRouter from "./blockchain/routes/user.key.route"
 import { router as userProfileRouter } from "./routes/user/profile"
+import { router as userOrderRouter } from "./routes/user/order"
 import router from "./routes/farmer/verify"
 import productRouter from "./routes/farmer/product"
 import prisma from "./db/prisma"
@@ -103,6 +104,7 @@ app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
 app.use("/api/user/auth", userAuthRouter)
 app.use("/api/user/keys", userKeyRouter)
 app.use("/api/user/profile", userProfileRouter)
+app.use("/api/user/order", userOrderRouter)
 
 
 
