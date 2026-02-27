@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (state.isLoading) return;
 
         const inAuthGroup = segments[0] === '(auth)';
-        const inOnboarding = segments[0] === 'onboarding' || segments[0] === 'create-wallet';
+        const inOnboarding = segments[0] === 'onboarding' || segments[0] === 'initialize-profile' || segments[0] === 'create-wallet';
 
         if (!state.token && !inAuthGroup) {
             // Redirect to login if not authenticated
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (state.token && !state.onboardingComplete) {
             // Redirect to onboarding if authenticated but not complete
             if (!inOnboarding) {
-                router.replace('/onboarding');
+                router.replace('/initialize-profile');
             }
         } else if (state.token && state.onboardingComplete) {
             // Redirect to home if authenticated and onboarding complete

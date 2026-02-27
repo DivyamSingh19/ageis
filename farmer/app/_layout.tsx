@@ -38,7 +38,8 @@ function RootLayoutContent() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ title: 'Login', headerShown: false }} />
         <Stack.Screen name="(auth)/register" options={{ title: 'Register', headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ title: 'Onboarding', headerShown: false }} />
+        <Stack.Screen name="initialize-profile" options={{ title: 'Onboarding', headerShown: false }} />
+        <Stack.Screen name="onboarding/profile" options={{ title: 'Profile Setup', headerShown: false }} />
         <Stack.Screen name="verify-nfc" options={{ title: 'Verify NFC' }} />
         <Stack.Screen name="transaction" options={{ title: 'Transaction' }} />
         <Stack.Screen name="wallet" options={{ title: 'Wallet' }} />

@@ -15,7 +15,7 @@ export default function OnboardingScreen() {
             </Text>
 
             <TouchableOpacity
-                onPress={() => router.push('/create-wallet')}
+                onPress={() => router.push('/onboarding/profile' as any)}
                 className="bg-green-500 w-full py-4 rounded-xl items-center"
             >
                 <Text className="text-black font-bold text-lg">Continue to Wallet Creation</Text>

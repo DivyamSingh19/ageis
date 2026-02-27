@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import nacl from 'tweetnacl';
 import * as Crypto from 'expo-crypto';
 import { base58Encode } from '../utils/base58';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 import { useAuth } from '../context/auth-context';
+import { useRouter } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CreateWalletScreen() {
+    const router = useRouter();
     const { user, completeOnboarding } = useAuth();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
@@ -78,8 +82,23 @@ export default function CreateWalletScreen() {
     };
 
     return (
-        <ScrollView className="flex-1 bg-black p-5">
-            <View className="mt-12 items-center">
+        <ScrollView className="flex-1 bg-black p-6">
+            <View className="flex-row items-center justify-between mt-8 mb-6">
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="chevron-back" size={28} color="white" />
+                </TouchableOpacity>
+                <Text className="text-white text-xl font-bold">Wallet Creation</Text>
+                <View style={{ width: 28 }} />
+            </View>
+
+            {/* Progress Indicator */}
+            <View className="flex-row justify-center gap-2 mb-8">
+                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
+                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
+                <View className="h-1.5 w-12 bg-green-500 rounded-full" />
+            </View>
+
+            <View className="items-center">
                 <Text className="text-2xl font-bold mb-2 text-white">
                     Create Solana Wallet
                 </Text>
@@ -91,13 +110,13 @@ export default function CreateWalletScreen() {
                 <Pressable
                     onPress={createWallet}
                     disabled={loading}
-                    className="bg-indigo-600 px-8 py-4 rounded-xl mb-6"
+                    className="bg-green-500 w-full py-5 rounded-2xl flex-row items-center justify-center mb-6"
                     style={{ opacity: loading ? 0.5 : 1 }}
                 >
                     {loading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text className="text-white font-bold text-lg">Create Wallet</Text>
+                        <Text className="text-black font-bold text-lg">Complete Onboarding</Text>
                     )}
                 </Pressable>
 

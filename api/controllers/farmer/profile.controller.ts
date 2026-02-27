@@ -3,12 +3,6 @@ import prisma from "../../db/prisma";
 import { HTTPStatus } from "../../services/http/status";
 import { uploadFilesToPinata } from "../../services/products/upload.image.service";
 
-// ─────────────────────────────────────────────
-// CREATE Farmer Profile
-// POST /api/farmer-profile/create
-// body: { farmerId, bio?, location }
-// file: certificate (via multer, single)
-// ─────────────────────────────────────────────
 export const createFarmerProfile = async (req: Request, res: Response) => {
   try {
     const { farmerId, bio, location } = req.body;
@@ -19,9 +13,11 @@ export const createFarmerProfile = async (req: Request, res: Response) => {
         .json({ message: "farmerId and location are required" });
     }
 
-    const existing = await prisma.farmerProfile.findUnique({
-      where: { farmerId },
-    });
+    // ✅ Run DB check + Pinata upload in parallel
+    const [existing, uploadedUrls] = await Promise.all([
+      prisma.farmerProfile.findUnique({ where: { farmerId } }),
+      req.file ? uploadFilesToPinata([req.file]) : Promise.resolve([]),
+    ]);
 
     if (existing) {
       return res
@@ -29,12 +25,7 @@ export const createFarmerProfile = async (req: Request, res: Response) => {
         .json({ message: "Profile already exists for this farmer" });
     }
 
-    let certificateUrl: string | null = null;
-
-    if (req.file) {
-      const urls = await uploadFilesToPinata([req.file]);
-      certificateUrl = urls[0] ?? null;
-    }
+    const certificateUrl = uploadedUrls[0] ?? null;
 
     const profile = await prisma.farmerProfile.create({
       data: {
@@ -55,7 +46,6 @@ export const createFarmerProfile = async (req: Request, res: Response) => {
       .json({ message: "Internal server error" });
   }
 };
-
 
 export const getFarmerProfile = async (req: Request, res: Response) => {
   try {
@@ -87,12 +77,6 @@ export const getFarmerProfile = async (req: Request, res: Response) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// UPDATE Farmer Profile
-// PUT /api/farmer-profile/update
-// body: { farmerId, bio?, location? }
-// file: certificate (via multer, optional)
-// ─────────────────────────────────────────────
 export const updateFarmerProfile = async (req: Request, res: Response) => {
   try {
     const { farmerId, bio, location } = req.body;
@@ -103,9 +87,11 @@ export const updateFarmerProfile = async (req: Request, res: Response) => {
         .json({ message: "farmerId is required" });
     }
 
-    const existing = await prisma.farmerProfile.findUnique({
-      where: { farmerId },
-    });
+    
+    const [existing, uploadedUrls] = await Promise.all([
+      prisma.farmerProfile.findUnique({ where: { farmerId } }),
+      req.file ? uploadFilesToPinata([req.file]) : Promise.resolve([]),
+    ]);
 
     if (!existing) {
       return res
@@ -113,12 +99,7 @@ export const updateFarmerProfile = async (req: Request, res: Response) => {
         .json({ message: "Farmer profile not found" });
     }
 
-    let certificateUrl: string | null = existing.certificateUrl ?? null;
-
-    if (req.file) {
-      const urls = await uploadFilesToPinata([req.file]);
-      certificateUrl = urls[0] ?? certificateUrl;
-    }
+    const certificateUrl = uploadedUrls[0] ?? existing.certificateUrl ?? null;
 
     const updated = await prisma.farmerProfile.update({
       where: { farmerId },
@@ -140,11 +121,6 @@ export const updateFarmerProfile = async (req: Request, res: Response) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// UPDATE Trust Score
-// PATCH /api/farmer-profile/trust-score
-// body: { farmerId, trustScore }
-// ─────────────────────────────────────────────
 export const updateTrustScore = async (req: Request, res: Response) => {
   try {
     const { farmerId, trustScore } = req.body;
@@ -171,11 +147,6 @@ export const updateTrustScore = async (req: Request, res: Response) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// UPDATE Rating
-// PATCH /api/farmer-profile/rating
-// body: { farmerId, rating }
-// ─────────────────────────────────────────────
 export const updateRating = async (req: Request, res: Response) => {
   try {
     const { farmerId, rating } = req.body;
@@ -187,6 +158,7 @@ export const updateRating = async (req: Request, res: Response) => {
     }
 
     const ratingNum = Number(rating);
+
     if (ratingNum < 0 || ratingNum > 5) {
       return res
         .status(HTTPStatus.BAD_REQUEST)
@@ -209,11 +181,6 @@ export const updateRating = async (req: Request, res: Response) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// DELETE Farmer Profile
-// DELETE /api/farmer-profile/delete
-// body: { farmerId }
-// ─────────────────────────────────────────────
 export const deleteFarmerProfile = async (req: Request, res: Response) => {
   try {
     const { farmerId } = req.body;

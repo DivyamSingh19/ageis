@@ -13,9 +13,10 @@ export default function FarmerNavigationHub() {
 
         { name: 'Profile', href: '/(tabs)/profile' },
         { name: 'New Product', href: '/(tabs)/new-product' },
-        { name: 'Onboarding', href: '/onboarding' },
+        { name: 'Onboarding', href: '/onboarding/profile' },
         { name: 'Verify NFC', href: '/verify-nfc' },
         { name: 'Transaction', href: '/transaction' },
+        { name: "Init profile", href: "/initialize-profile" },
         { name: 'Wallet', href: '/wallet' },
         { name: 'Create Wallet', href: '/create-wallet' },
         { name: 'Product 123', href: '/product/123' },
@@ -27,8 +28,8 @@ export default function FarmerNavigationHub() {
     return (
         <ScrollView className="flex-1 bg-black p-4">
             <View className="mb-6">
-                <Text className="text-3xl font-bold text-white">Farmer Hub</Text>
-                <Text className="text-gray-400 mt-1"> структурный доступ к страницам фермера</Text>
+                <Text className="text-3xl font-bold text-white">Ageis Farmer</Text>
+                
             </View>
 
             <View className="space-y-3">

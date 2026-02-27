@@ -12,6 +12,8 @@ import { router as userOrderRouter } from "./routes/user/order"
 import router from "./routes/farmer/verify"
 import productRouter from "./routes/farmer/product"
 import prisma from "./db/prisma"
+import farmerProfileRouter from "./routes/farmer/profile"
+
 
 const app = express()
 const port = 4000
@@ -49,6 +51,7 @@ app.get("/", async (req: Request, res: Response) => {
 //farmer routes
 app.use("/api/farmer/auth", farmerAuthRouter)
 app.use("/api/farmer/keys", keyRouter)
+app.use("/api/farmer-profile", farmerProfileRouter)
 app.use("/api/farmer/products", productRouter)
 //gemini verification route
 app.use("/api/farmer", router)
@@ -72,7 +75,7 @@ app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
         const baseUrl = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.get("host")}`
         const image = product.pinataImageUrl?.[0] ?? null
 
-        // Minimal Metaplex-style JSON
+         
         return res.json({
             name: product.name,
             symbol: "AGEIS",
