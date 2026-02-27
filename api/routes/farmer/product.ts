@@ -5,8 +5,8 @@ import { upload } from "../../config/multer";
 const productRouter = Router();
 const controller = new ProductController();
 
-productRouter.post("/", upload.array("images", 5), controller.create);
-productRouter.put("/:id", upload.array("images", 5), controller.update);
+productRouter.post("/", upload.array("files", 5), controller.create);
+productRouter.put("/:id", upload.array("files", 5), controller.update);
 productRouter.delete("/:id", controller.delete);
 productRouter.get("/:id/nft", controller.getNftInfo);
 productRouter.get("/:id", controller.getById);

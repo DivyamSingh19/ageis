@@ -1,8 +1,8 @@
+import dotenv from "dotenv"
+dotenv.config()
+
 import express, { Request, Response } from "express"
 import cors from "cors"
-import dotenv from "dotenv"
-import { router as adminAuthRouter } from "./routes/admin/auth"
-import { router as deliveryAuthRouter } from "./routes/delivery/auth"
 import { router as farmerAuthRouter } from "./routes/farmer/auth.routes"
 import { router as userAuthRouter } from "./routes/user/auth"
 import keyRouter from "./blockchain/routes/key.routes"
@@ -11,10 +11,10 @@ import { router as userProfileRouter } from "./routes/user/profile"
 import router from "./routes/farmer/verify"
 import productRouter from "./routes/farmer/product"
 import prisma from "./db/prisma"
+
 const app = express()
 const port = 4000
 
-dotenv.config()
 app.use(express.json())
 app.use(cors())
 declare global {
@@ -55,7 +55,7 @@ app.use("/api/farmer", router)
 // public metadata endpoint for Solana NFT metadata_uri
 app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
     try {
-        const { id } = req.params
+        const { id } = req.body
 
         const product = await prisma.products.findUnique({
             where: { id },
