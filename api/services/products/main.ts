@@ -1,13 +1,13 @@
 import prisma from "../../db/prisma";
 
 export class ProductService {
-  static async getById(productId: string) {
-    return prisma.products.findUnique({
+   static async getById(productId: string) {
+    return prisma.products.findFirst({
       where: { id: productId }
     });
   }
 
-  static async create(data: {
+   static async create(data: {
     name: string;
     pinataImageUrl: string;
     category?: string;
@@ -25,14 +25,14 @@ export class ProductService {
     });
   }
 
-  static async updateImage(productId: string, pinataImageUrl: string) {
+   static async updateImage(productId: string, pinataImageUrl: string) {
     return prisma.products.update({
       where: { id: productId },
       data: { pinataImageUrl: pinataImageUrl ? [pinataImageUrl] : [] }
     });
   }
 
-  static async deactivate(productId: string) {
+   static async deactivate(productId: string) {
     return prisma.products.update({
       where: { id: productId },
       data: { isActive: false }

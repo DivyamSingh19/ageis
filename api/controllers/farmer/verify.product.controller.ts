@@ -73,7 +73,7 @@ export const verifyProductWithGemini = async (req: Request, res: Response) => {
         const sig = await client.mintProductNft(
           {
             orderId: product.id,
-            productName: product.name,
+            productName: product.name.substring(0,32),
             metadataUri,
             farmerWallet: new PublicKey(farmerKeys.publicKey),
           },

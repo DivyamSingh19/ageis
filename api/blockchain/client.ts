@@ -37,12 +37,20 @@ export const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 /** Delivery status enum — mirrors the on-chain u8 values */
 export enum DeliveryStatus {
   Initialized = 0,
-  PickedUp    = 1,
-  InTransit   = 2,
-  Delivered   = 3,
+  PickedUp = 1,
+  InTransit = 2,
+  Delivered = 3,
 }
 
 // ─── PDA helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Strip dashes from a UUID to make it 32 characters (32 bytes).
+ * Solana PDA seeds have a 32-byte limit.
+ */
+function toShortId(orderId: string): string {
+  return orderId.replace(/-/g, "");
+}
 
 /**
  * Derive the ProductTrace PDA for a given order ID.
@@ -50,7 +58,7 @@ export enum DeliveryStatus {
  */
 export function deriveProductTracePDA(orderId: string): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("product"), Buffer.from(orderId)],
+    [Buffer.from("product"), Buffer.from(toShortId(orderId))],
     PROGRAM_ID
   );
 }
@@ -61,7 +69,7 @@ export function deriveProductTracePDA(orderId: string): [PublicKey, number] {
  */
 export function deriveDeliveryTracePDA(orderId: string): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from("delivery"), Buffer.from(orderId)],
+    [Buffer.from("delivery"), Buffer.from(toShortId(orderId))],
     PROGRAM_ID
   );
 }
@@ -187,10 +195,11 @@ export class AgeisClient {
     mintKeypair: Keypair
   ): Promise<TransactionSignature> {
     const serverAuthority = this.provider.wallet.publicKey;
+    const shortOrderId = toShortId(args.orderId);
 
     const [productTracePDA] = deriveProductTracePDA(args.orderId);
-    const [metadataPDA]     = deriveMetadataPDA(mintKeypair.publicKey);
-    const [masterEditionPDA]= deriveMasterEditionPDA(mintKeypair.publicKey);
+    const [metadataPDA] = deriveMetadataPDA(mintKeypair.publicKey);
+    const [masterEditionPDA] = deriveMasterEditionPDA(mintKeypair.publicKey);
 
     // ATA seed derivation mirrors the IDL (Associated Token Program)
     const [tokenAccount] = PublicKey.findProgramAddressSync(
@@ -204,23 +213,23 @@ export class AgeisClient {
 
     const sig = await this.program.methods
       .mintProductNft({
-        orderId:      args.orderId,
-        productName:  args.productName,
-        metadataUri:  args.metadataUri,
+        orderId: shortOrderId,
+        productName: args.productName.substring(0, 32),
+        metadataUri: args.metadataUri,
         farmerWallet: args.farmerWallet,
       })
       .accounts({
         serverAuthority,
-        mint:                 mintKeypair.publicKey,
+        mint: mintKeypair.publicKey,
         tokenAccount,
-        productTrace:         productTracePDA,
-        metadata:             metadataPDA,
-        masterEdition:        masterEditionPDA,
+        productTrace: productTracePDA,
+        metadata: metadataPDA,
+        masterEdition: masterEditionPDA,
         tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-        tokenProgram:         TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        systemProgram:        SystemProgram.programId,
-        rent:                 SYSVAR_RENT_PUBKEY,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
       })
       .signers([mintKeypair])
       .rpc();
@@ -239,20 +248,20 @@ export class AgeisClient {
   async initializeDelivery(args: InitDeliveryArgs): Promise<TransactionSignature> {
     const serverAuthority = this.provider.wallet.publicKey;
 
-    const [productTracePDA]  = deriveProductTracePDA(args.orderId);
+    const [productTracePDA] = deriveProductTracePDA(args.orderId);
     const [deliveryTracePDA] = deriveDeliveryTracePDA(args.orderId);
 
     const sig = await this.program.methods
       .initializeDelivery({
-        orderId:          args.orderId,
-        nfcUid:           args.nfcUid,
-        farmerId:         args.farmerId,
+        orderId: toShortId(args.orderId),
+        nfcUid: args.nfcUid,
+        farmerId: args.farmerId,
         deliveryPartnerId: args.deliveryPartnerId,
-        consumerId:       args.consumerId,
+        consumerId: args.consumerId,
       })
       .accounts({
         serverAuthority,
-        productTrace:  productTracePDA,
+        productTrace: productTracePDA,
         deliveryTrace: deliveryTracePDA,
         systemProgram: SystemProgram.programId,
       })
