@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../context/auth-context';
 
 export default function FarmerNavigationHub() {
     const router = useRouter();
+    const { logout } = useAuth();
 
     const links = [
         { name: 'Login', href: '/(auth)/login' },
         { name: 'Register', href: '/(auth)/register' },
-        
+
         { name: 'Profile', href: '/(tabs)/profile' },
         { name: 'New Product', href: '/(tabs)/new-product' },
         { name: 'Onboarding', href: '/onboarding' },
@@ -42,6 +44,16 @@ export default function FarmerNavigationHub() {
                         </View>
                     </TouchableOpacity>
                 ))}
+
+                <TouchableOpacity
+                    onPress={logout}
+                    className="bg-red-500/10 p-4 rounded-xl border border-red-500/20 shadow-sm active:bg-red-500/20 mt-4"
+                >
+                    <View className="flex-row justify-between items-center">
+                        <Text className="text-lg font-bold text-red-500">Logout</Text>
+                        <Text className="text-red-400/50 font-medium">Clear Auth Session</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
             <View className="h-10" />
         </ScrollView>

@@ -9,6 +9,7 @@ CREATE TABLE "User" (
     "passwordHash" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "onboardingComplete" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -19,6 +20,7 @@ CREATE TABLE "Farmer" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
+    "onboardingComplete" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -55,55 +57,43 @@ CREATE TABLE "FarmerProfile" (
 );
 
 -- CreateTable
-CREATE TABLE "DeliveryAgent" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "passwordHash" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "DeliveryAgent_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "DeliveryAgentProfile" (
-    "id" TEXT NOT NULL,
-    "phoneNumber" TEXT NOT NULL,
-    "orderCount" INTEGER NOT NULL DEFAULT 0,
-    "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "agentId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "DeliveryAgentProfile_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Admin" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "passwordHash" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Products" (
     "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "productionDate" TIMESTAMP(3) NOT NULL,
+    "pinataImageUrl" TEXT[],
+    "category" TEXT,
+    "farmLocation" TEXT,
+    "quantity" INTEGER NOT NULL DEFAULT 0,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "verified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "farnerId" TEXT NOT NULL,
+    "farmerId" TEXT NOT NULL,
 
     CONSTRAINT "Products_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "ProductNFT" (
+    "id" TEXT NOT NULL,
+    "tokenId" TEXT NOT NULL,
+    "signature" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ProductNFT_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "farmerId" TEXT NOT NULL,
+    "productId" TEXT NOT NULL,
+    "quantity" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -134,7 +124,8 @@ CREATE TABLE "OrderNFT" (
 CREATE TABLE "Delivery" (
     "id" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
-    "agentId" TEXT NOT NULL,
+    "status" "DeliveryStatus" NOT NULL DEFAULT 'Initialized',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Delivery_pkey" PRIMARY KEY ("id")
 );
@@ -178,13 +169,13 @@ CREATE UNIQUE INDEX "UserProfile_userId_key" ON "UserProfile"("userId");
 CREATE UNIQUE INDEX "FarmerProfile_farmerId_key" ON "FarmerProfile"("farmerId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DeliveryAgent_email_key" ON "DeliveryAgent"("email");
+CREATE UNIQUE INDEX "Products_id_key" ON "Products"("id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DeliveryAgentProfile_agentId_key" ON "DeliveryAgentProfile"("agentId");
+CREATE UNIQUE INDEX "ProductNFT_tokenId_key" ON "ProductNFT"("tokenId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+CREATE INDEX "ProductNFT_id_idx" ON "ProductNFT"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "OrderNFC_nfcId_key" ON "OrderNFC"("nfcId");
@@ -197,9 +188,6 @@ CREATE INDEX "OrderNFT_id_idx" ON "OrderNFT"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Delivery_orderId_key" ON "Delivery"("orderId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Delivery_agentId_key" ON "Delivery"("agentId");
 
 -- CreateIndex
 CREATE INDEX "Delivery_id_idx" ON "Delivery"("id");
@@ -223,10 +211,19 @@ ALTER TABLE "UserProfile" ADD CONSTRAINT "UserProfile_userId_fkey" FOREIGN KEY (
 ALTER TABLE "FarmerProfile" ADD CONSTRAINT "FarmerProfile_farmerId_fkey" FOREIGN KEY ("farmerId") REFERENCES "Farmer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DeliveryAgentProfile" ADD CONSTRAINT "DeliveryAgentProfile_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES "DeliveryAgent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Products" ADD CONSTRAINT "Products_farmerId_fkey" FOREIGN KEY ("farmerId") REFERENCES "Farmer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Products" ADD CONSTRAINT "Products_farnerId_fkey" FOREIGN KEY ("farnerId") REFERENCES "Farmer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProductNFT" ADD CONSTRAINT "ProductNFT_id_fkey" FOREIGN KEY ("id") REFERENCES "Products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_farmerId_fkey" FOREIGN KEY ("farmerId") REFERENCES "Farmer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderNFC" ADD CONSTRAINT "OrderNFC_id_fkey" FOREIGN KEY ("id") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
