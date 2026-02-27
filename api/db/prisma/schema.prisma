@@ -59,6 +59,7 @@ model Farmer {
   keys         FarmerKeys?
   profile      FarmerProfile?
   products     Products[]
+  deliveries   Delivery[]
 }
 
 model UserProfile {
@@ -160,8 +161,12 @@ model Delivery {
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id])
   
-   
+  farmerId String
+  farmer   Farmer @relation(fields: [farmerId], references: [id])
+
   status  DeliveryStatus @default(Initialized)  
+  details Json?
+  
   createdAt DateTime @default(now())
   @@index([id])
 }
