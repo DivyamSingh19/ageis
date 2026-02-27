@@ -12,6 +12,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth-context";
 
@@ -106,10 +107,24 @@ export default function NewProduceScreen({ navigation }: any) {
 
   const set = (key: string, val: string) => setForm((p) => ({ ...p, [key]: val }));
 
-  const mockPickImage = () => {
-    // Replace with: ImagePicker.launchImageLibraryAsync(...)
-    const mockUri = `https://picsum.photos/seed/${Date.now()}/200/200`;
-    if (images.length < 5) setImages((p) => [...p, mockUri]);
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Camera access is required to take product photos.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      if (images.length < 5) setImages((p) => [...p, uri]);
+    }
   };
 
   const removeImage = (idx: number) => setImages((p) => p.filter((_, i) => i !== idx));
@@ -490,7 +505,7 @@ export default function NewProduceScreen({ navigation }: any) {
 
               {images.length < 5 && (
                 <TouchableOpacity
-                  onPress={mockPickImage}
+                  onPress={pickImage}
                   style={{
                     width: 90,
                     height: 90,

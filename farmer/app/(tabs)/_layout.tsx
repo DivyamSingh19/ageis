@@ -6,6 +6,7 @@ export default function TabLayout() {
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
+      initialRouteName="profile"
       screenOptions={{
         headerShown: false,
       }}>
