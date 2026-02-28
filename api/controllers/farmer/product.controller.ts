@@ -84,7 +84,7 @@ export class ProductController {
           .json({ message: "Unauthorized" });
       }
 
-      const product = await prisma.products.findUnique({ where: { id } });
+      const product = await prisma.products.findUnique({ where: { id: id as string } });
 
       if (!product) {
         return res
@@ -122,7 +122,7 @@ export class ProductController {
           .json({ message: "Unauthorized" });
       }
 
-      const product = await prisma.products.findUnique({ where: { id } });
+      const product = await prisma.products.findUnique({ where: { id: id as string } });
 
       if (!product) {
         return res
@@ -320,6 +320,7 @@ export class ProductController {
         limit = "100",
         category,
         search,
+        verified,
       } = req.query;
 
       const pageNum = Math.max(1, parseInt(page as string) || 1);
@@ -328,6 +329,7 @@ export class ProductController {
 
       const where: any = {
         isActive: true,
+        ...(verified !== undefined && verified !== "" && { verified: verified === "true" }),
         ...(category && category !== "all" && { category: category as string }),
         ...(search && (search as string).trim() && {
           OR: [

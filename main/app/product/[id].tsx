@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, SafeAreaView, StatusBar, Dimensions, Platform } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, SafeAreaView, StatusBar, Dimensions, Alert } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../../context/auth-context';
 
-const { width } = Dimensions.get('window');
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const ACCENT_YELLOW = '#FFC000';
 
 export default function ProductDetailsScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+    const { token } = useAuth();
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [nftInfo, setNftInfo] = useState<any>(null);
+    const [ordering, setOrdering] = useState(false);
 
     useEffect(() => {
         fetchProductDetails();
@@ -39,6 +41,46 @@ export default function ProductDetailsScreen() {
         }
     };
 
+    const handleOrder = async () => {
+        if (!token) {
+            Alert.alert("Error", "Please login to place an order");
+            router.push('/(auth)/login');
+            return;
+        }
+
+        setOrdering(true);
+        try {
+            const response = await fetch(`${API_URL}/api/user/order/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId: id })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                Alert.alert(
+                    "Success",
+                    "Order placed successfully! You can track it in your profile.",
+                    [
+                        { text: "View Orders", onPress: () => router.push('/(tabs)/profile') },
+                        { text: "OK", style: "cancel" }
+                    ]
+                );
+            } else {
+                Alert.alert("Error", data.message || "Failed to place order");
+            }
+        } catch (error) {
+            console.error("Order error:", error);
+            Alert.alert("Error", "Network error while placing order");
+        } finally {
+            setOrdering(false);
+        }
+    };
+
     if (loading) {
         return (
             <View className="flex-1 bg-black items-center justify-center">
@@ -50,7 +92,7 @@ export default function ProductDetailsScreen() {
     if (!product) {
         return (
             <View className="flex-1 bg-black items-center justify-center">
-                <Text className="text-white">Product not found</Text>
+                <Text className="text-white text-lg">Product not found</Text>
             </View>
         );
     }
@@ -60,9 +102,7 @@ export default function ProductDetailsScreen() {
     return (
         <SafeAreaView className="flex-1 bg-black">
             <StatusBar barStyle="light-content" />
-            <Stack.Screen options={{
-                headerShown: false
-            }} />
+            <Stack.Screen options={{ headerShown: false }} />
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Image Header */}
@@ -80,7 +120,6 @@ export default function ProductDetailsScreen() {
                         className="absolute inset-0"
                     />
 
-                    {/* Back Button */}
                     <TouchableOpacity
                         onPress={() => router.back()}
                         className="absolute top-12 left-6 w-10 h-10 rounded-full bg-black/50 items-center justify-center"
@@ -88,7 +127,6 @@ export default function ProductDetailsScreen() {
                         <Ionicons name="chevron-back" size={24} color="white" />
                     </TouchableOpacity>
 
-                    {/* Trace Badge */}
                     <View className="absolute bottom-6 left-6">
                         <View style={{ backgroundColor: 'rgba(255, 192, 0, 0.2)', borderWidth: 1, borderColor: ACCENT_YELLOW }} className="px-4 py-1.5 rounded-full flex-row items-center">
                             <Ionicons name="shield-checkmark" size={14} color={ACCENT_YELLOW} />
@@ -143,7 +181,7 @@ export default function ProductDetailsScreen() {
                             </View>
 
                             <TraceRow label="Batch Hash" value={`0x${product.id.slice(0, 12)}...`} />
-                            <TraceRow label="Production Date" value={new Date(product.productionDate).toLocaleDateString()} />
+                            <TraceRow label="Production Date" value={product.productionDate ? new Date(product.productionDate).toLocaleDateString() : 'N/A'} />
                             <TraceRow label="AI Quality Score" value="98/100" />
                             <TraceRow label="Location" value={product.farmLocation || "Undisclosed Farm"} isLast />
                         </View>
@@ -151,13 +189,18 @@ export default function ProductDetailsScreen() {
                 </View>
             </ScrollView>
 
-            {/* Bottom Action Bar */}
             <View className="px-6 py-6 border-t border-zinc-900 bg-black/80 backdrop-blur-xl">
                 <TouchableOpacity
                     style={{ backgroundColor: ACCENT_YELLOW }}
                     className="h-16 rounded-2xl items-center justify-center shadow-xl shadow-yellow-500/20"
+                    onPress={handleOrder}
+                    disabled={ordering}
                 >
-                    <Text className="text-black font-black text-lg tracking-widest uppercase">Add to Cart</Text>
+                    {ordering ? (
+                        <ActivityIndicator color="black" />
+                    ) : (
+                        <Text className="text-black font-black text-lg tracking-widest uppercase">Order Now</Text>
+                    )}
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

@@ -6,7 +6,8 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 export class OrderController {
     create = async (req: Request, res: Response) => {
         try {
-            const {userId,productId} = req.body;
+            const userId = req.userId;
+            const { productId } = req.body;
             if (!userId) {
                 return res.status(HTTPStatus.UNAUTHORIZED).json({
                     success: false,
@@ -14,7 +15,7 @@ export class OrderController {
                 });
             }
 
-           
+
             if (!productId) {
                 return res.status(HTTPStatus.BAD_REQUEST).json({
                     success: false,
@@ -22,9 +23,7 @@ export class OrderController {
                 });
             }
 
-            const product = await prisma.products.findUnique({
-                where: { id: productId }
-            });
+            const product = await prisma.products.findUnique({ where: { id: productId as string } });
 
             if (!product) {
                 return res.status(HTTPStatus.NOT_FOUND).json({
@@ -144,7 +143,7 @@ export class OrderController {
             }
 
             const order = await prisma.order.findUnique({
-                where: { id: orderId }
+                where: { id: orderId as string }
             });
 
             if (!order) {
@@ -155,7 +154,7 @@ export class OrderController {
             }
 
             const updatedOrder = await prisma.order.update({
-                where: { id: orderId },
+                where: { id: orderId as string },
                 data: { status: "CANCELED" }
             });
 

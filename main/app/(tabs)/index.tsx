@@ -181,6 +181,7 @@ function ArrivalCard({ item }: { item: any }) {
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function AegisHomeScreen() {
   const [products, setProducts] = useState<any[]>([]);
+  const [verifiedProducts, setVerifiedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -199,32 +200,39 @@ export default function AegisHomeScreen() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // Build query params — backend `discover` controller handles category="all" gracefully
-      const params = new URLSearchParams({
+      const baseParams: Record<string, string> = {
         page: "1",
         limit: "100",
         ...(activeCategory !== "all" && { category: activeCategory }),
         ...(searchDebounced.trim() && { search: searchDebounced.trim() }),
-      });
+      };
 
-      const endpoint = `${API_URL}/api/user/products?${params.toString()}`;
-      const response = await fetch(endpoint);
+      // All products (for New Arrivals) and verified-only (for Recommended) from DB
+      const [allRes, verifiedRes] = await Promise.all([
+        fetch(`${API_URL}/api/user/products?${new URLSearchParams(baseParams).toString()}`),
+        fetch(`${API_URL}/api/user/products?${new URLSearchParams({ ...baseParams, verified: "true" }).toString()}`),
+      ]);
 
-      if (!response.ok) {
-        console.error("[fetchProducts] Failed:", response.status, await response.text());
+      if (!allRes.ok) {
+        console.error("[fetchProducts] Failed:", allRes.status, await allRes.text());
         return;
       }
 
-      const data = await response.json();
-      setProducts(data.products ?? []);
+      const allData = await allRes.json();
+      setProducts(allData.products ?? []);
+
+      if (verifiedRes.ok) {
+        const verifiedData = await verifiedRes.json();
+        setVerifiedProducts(verifiedData.products ?? []);
+      } else {
+        setVerifiedProducts([]);
+      }
     } catch (error) {
       console.error("[fetchProducts] Network error:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  const verifiedProducts = products.filter((p) => p.verified);
 
   return (
     <SafeAreaView className="flex-1 bg-black">
