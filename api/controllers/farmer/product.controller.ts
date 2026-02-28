@@ -75,7 +75,7 @@ export class ProductController {
 
   delete = async (req: Request, res: Response) => {
     try {
-      const id = req.body;
+      const id = req.params.id;
       const farmerId = req.farmerId;
 
       if (!farmerId) {
@@ -98,7 +98,7 @@ export class ProductController {
           .json({ message: "Forbidden: You do not own this product" });
       }
 
-      await prisma.products.delete({ where: { id } });
+      await prisma.products.delete({ where: { id: id as string } });
 
       return res
         .status(HTTPStatus.OK)
@@ -113,7 +113,7 @@ export class ProductController {
 
   update = async (req: Request, res: Response) => {
     try {
-      const id = req.body
+      const id = req.params.id;
       const farmerId = req.farmerId;
 
       if (!farmerId) {
@@ -146,7 +146,7 @@ export class ProductController {
       }
 
       const updated = await prisma.products.update({
-        where: { id },
+        where: { id: id as string },
         data: {
           ...(name && { name }),
           ...(description && { description }),

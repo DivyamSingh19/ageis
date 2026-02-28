@@ -45,13 +45,13 @@ export default function ProfileScreen() {
                 })
             ]);
 
-            const profileData = await profileRes.json();
-            const keysData = await keysRes.json();
-            const productsData = await productsRes.json();
-            const ordersData = await ordersRes.json();
+            const profileData = profileRes.ok ? await profileRes.json().catch(() => null) : null;
+            const keysData = keysRes.ok ? await keysRes.json().catch(() => null) : null;
+            const productsData = productsRes.ok ? await productsRes.json().catch(() => null) : null;
+            const ordersData = ordersRes.ok ? await ordersRes.json().catch(() => null) : null;
 
-            if (profileRes.ok) setProfile(profileData.profile);
-            if (keysRes.ok && keysData.key) setPublicKey(keysData.key.publicKey);
+            if (profileData) setProfile(profileData.profile);
+            if (keysData && keysData.key) setPublicKey(keysData.key.publicKey);
 
             let totalBatches = 0;
             let verifiedRatio = 0;
