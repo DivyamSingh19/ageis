@@ -73,7 +73,7 @@ app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
                 farmer: { select: { name: true } },
             },
         }) as any
-
+0
         if (!product) {
             return res.status(404).json({ message: "Product not found" })
         }

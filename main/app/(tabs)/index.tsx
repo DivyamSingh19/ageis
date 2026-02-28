@@ -1,471 +1,310 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  ScrollView,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Animated,
   StatusBar,
-  Dimensions,
+  SafeAreaView,
+  Image,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
-const { width } = Dimensions.get("window");
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Data Helpers ──────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "Vegetables", label: "🥦 Veggie" },
+  { id: "Fruits", label: "🍎 Fruits" },
+  { id: "Grains", label: "🌾 Grains" },
+];
 
-interface InputFieldProps {
-  label: string;
-  placeholder: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address";
-  hint?: string;
+// ─── Sub-components ────────────────────────────────────────────────────────────
+
+function Header() {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 }}>
+      <Image
+        source={require("../../assets/images/ageis_logo.png")}
+        style={{ width: 40, height: 40, tintColor: "#fff" }}
+        resizeMode="contain"
+      />
+      <Text style={{ color: "#FFC000", fontSize: 22, fontWeight: "800", letterSpacing: 1.2, textTransform: "uppercase" }}>
+        Aegis
+      </Text>
+      <TouchableOpacity style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#FFC000", alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ fontSize: 18 }}>🔔</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-const InputField: React.FC<InputFieldProps> = ({
-  label,
-  placeholder,
-  value,
-  onChangeText,
-  secureTextEntry = false,
-  keyboardType = "default",
-  hint,
-}) => {
-  const [focused, setFocused] = useState(false);
-  const borderAnim = useRef(new Animated.Value(0)).current;
-
-  const handleFocus = () => {
-    setFocused(true);
-    Animated.timing(borderAnim, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handleBlur = () => {
-    setFocused(false);
-    Animated.timing(borderAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const borderColor = borderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["#2a2a2a", "#39FF14"],
-  });
-
+function SearchBar({ value, onChangeText }: { value: string; onChangeText: (t: string) => void }) {
   return (
-    <View style={styles.fieldWrapper}>
-      <Text style={styles.label}>{label}</Text>
-      <Animated.View style={[styles.inputContainer, { borderColor }]}>
+    <View style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 20, marginBottom: 16, gap: 8 }}>
+      <View style={{ flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "#1a1a1a", borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12 }}>
+        <Text style={{ color: "rgba(255,255,255,0.4)", marginHorizontal: 12, fontSize: 16 }}>🔍</Text>
         <TextInput
-          style={styles.input}
-          placeholder={placeholder}
-          placeholderTextColor="#555"
+          placeholder="Search farm products..."
+          placeholderTextColor="rgba(255,255,255,0.4)"
+          style={{ flex: 1, color: "#fff", fontSize: 14 }}
           value={value}
           onChangeText={onChangeText}
-          secureTextEntry={secureTextEntry}
-          keyboardType={keyboardType}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          autoCapitalize="none"
+          returnKeyType="search"
         />
-      </Animated.View>
-      {hint && <Text style={styles.hint}>{hint}</Text>}
-    </View>
-  );
-};
-
-// ─── Logo Mark ───────────────────────────────────────────────────────────────
-
-const LogoMark: React.FC = () => (
-  <View style={styles.logoContainer}>
-    {/* Stylised "A" lettermark */}
-    <View style={styles.logoMark}>
-      <View style={styles.logoLeftLeg} />
-      <View style={styles.logoRightLeg} />
-      <View style={styles.logoCrossbar} />
-    </View>
-  </View>
-);
-
-// ─── Main Screen ─────────────────────────────────────────────────────────────
-
-export default function SignUpScreen() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const buttonScale = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
-    Animated.spring(buttonScale, {
-      toValue: 0.96,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(buttonScale, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleSignUp = () => {
-    console.log({ firstName, lastName, email, password });
-  };
-
-  return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
-
-      {/* Background gradient */}
-      <LinearGradient
-        colors={["#0d1a0d", "#0a0a0a", "#001a00"]}
-        locations={[0, 0.5, 1]}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      {/* Ambient glow blob */}
-      <View style={styles.glowBlob} pointerEvents="none" />
-
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Logo */}
-          <LogoMark />
-
-          {/* Title */}
-          <Text style={styles.title}>Sign Up</Text>
-
-          {/* Social buttons */}
-          <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.75}>
-              {/* Google "G" */}
-              <Text style={styles.socialBtnIcon}>G</Text>
-              <Text style={styles.socialBtnText}>Google</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.75}>
-              {/* MetaMask fox emoji stand-in */}
-              <Text style={styles.socialBtnIcon}>🦊</Text>
-              <Text style={styles.socialBtnText}>Metamask</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Form fields */}
-          <InputField
-            label="First Name"
-            placeholder="eg. Jane"
-            value={firstName}
-            onChangeText={setFirstName}
-          />
-          <InputField
-            label="Last Name"
-            placeholder="eg. Doe"
-            value={lastName}
-            onChangeText={setLastName}
-          />
-          <InputField
-            label="Email"
-            placeholder="eg. janedoe@gmail.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-          <InputField
-            label="Password"
-            placeholder="eg. janedoe@gmail.com"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            hint="Must be at least 8 characters"
-          />
-
-          {/* CTA button */}
-          <Animated.View
-            style={[
-              styles.ctaWrapper,
-              { transform: [{ scale: buttonScale }] },
-            ]}
-          >
-            <TouchableOpacity
-              style={styles.ctaBtn}
-              activeOpacity={0.9}
-              onPress={handleSignUp}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-            >
-              <LinearGradient
-                colors={["#39FF14", "#28cc0d"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.ctaGradient}
-              >
-                <Text style={styles.ctaText}>Sign Up</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Login redirect */}
-          <View style={styles.loginRow}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity>
-              <Text style={styles.loginLink}>Log in</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
+      <TouchableOpacity style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: "#1a1a1a", alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ color: "#fff", fontSize: 16 }}>⚙️</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
+function HeroBanner() {
+  return (
+    <View style={{ marginHorizontal: 20, marginBottom: 24, borderRadius: 16, overflow: "hidden" }}>
+      <View style={{ height: 144, justifyContent: "flex-end", padding: 16, backgroundColor: "#000" }}>
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }} />
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(255, 192, 0, 0.2)", borderWidth: 1, borderColor: "rgba(255, 192, 0, 0.4)", borderRadius: 100, paddingHorizontal: 12, paddingVertical: 2 }}>
+            <Text style={{ color: "#FFC000", fontSize: 10, marginRight: 4 }}>🛡️</Text>
+            <Text style={{ color: "#FFC000", fontSize: 10, fontWeight: "600", letterSpacing: 1.5 }}>
+              BLOCKCHAIN TRACED
+            </Text>
+          </View>
+        </View>
+        <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold", lineHeight: 28 }}>
+          AI-Verified Freshness{"\n"}In Every Harvest
+        </Text>
+      </View>
+    </View>
+  );
+}
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-  },
+function ProductCard({ item }: { item: any }) {
+  const router = useRouter();
+  const imageUri = item.pinataImageUrl?.[0];
 
-  glowBlob: {
-    position: "absolute",
-    top: -80,
-    alignSelf: "center",
-    width: 340,
-    height: 340,
-    borderRadius: 170,
-    backgroundColor: "#004d00",
-    opacity: 0.35,
-    // React Native doesn't support CSS blur, but the green tint
-    // creates the ambient glow effect.
-  },
+  return (
+    <TouchableOpacity
+      className="mr-4 rounded-2xl overflow-hidden"
+      style={{ width: 160 }}
+      onPress={() => router.push(`/product/${item.id}`)}
+    >
+      <View className="h-40 items-center justify-center" style={{ backgroundColor: "#111" }}>
+        {item.verified && (
+          <View className="absolute top-3 left-3 flex-row items-center rounded-full px-2 py-1 bg-black/70">
+            <Text style={{ color: "#FFC000", fontSize: 8, marginRight: 4 }}>⚡</Text>
+            <Text style={{ color: "#fff", fontSize: 8, fontWeight: "bold" }}>AI SCORE 98</Text>
+          </View>
+        )}
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={{ width: "100%", height: "100%" }} />
+        ) : (
+          <Text style={{ fontSize: 48 }}>🌾</Text>
+        )}
+      </View>
+      <View className="p-3" style={{ backgroundColor: "#000" }}>
+        <Text numberOfLines={1} className="text-white text-sm font-semibold leading-5 mb-1">
+          {item.name}
+        </Text>
+        <Text style={{ color: "#888", fontSize: 10, marginBottom: 4 }}>{item.farmer?.name}</Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-white text-sm font-bold">
+            Rs {item.price}
+            <Text className="text-white/50 text-[10px]"> /kg</Text>
+          </Text>
+          <TouchableOpacity
+            className="w-7 h-7 rounded-full items-center justify-center"
+            style={{ backgroundColor: "#FFC000" }}
+          >
+            <Text className="text-black text-base font-bold leading-none">+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
-  scroll: {
-    flexGrow: 1,
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 64,
-    paddingBottom: 40,
-  },
+function ArrivalCard({ item }: { item: any }) {
+  const router = useRouter();
+  const imageUri = item.pinataImageUrl?.[0];
 
-  // ── Logo ────────────────────────────────────────────────────────────────
+  return (
+    <TouchableOpacity
+      className="flex-row items-center mx-5 mb-3 rounded-2xl p-4"
+      style={{ backgroundColor: "#111" }}
+      onPress={() => router.push(`/product/${item.id}`)}
+    >
+      <View className="w-16 h-16 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: "#1a1a1a" }}>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={{ width: "100%", height: "100%", borderRadius: 12 }} />
+        ) : (
+          <Text style={{ fontSize: 32 }}>🥬</Text>
+        )}
+      </View>
+      <View className="flex-1">
+        <View className="flex-row items-center mb-1">
+          <Text style={{ color: "#FFC000", fontSize: 10, opacity: 0.7, marginRight: 4 }}>⛓</Text>
+          <Text style={{ color: "#FFC000", fontSize: 10, opacity: 0.7, fontWeight: "500", fontFamily: Platform.OS === "ios" ? "Courier" : "monospace" }}>
+            HASH: 0x{item.id.slice(0, 6)}...
+          </Text>
+        </View>
+        <Text numberOfLines={1} className="text-white text-base font-bold mb-0.5">{item.name}</Text>
+        <Text className="text-white/50 text-[10px] mb-2">{item.category}</Text>
+        <Text className="text-white text-sm font-bold">Rs {item.price}</Text>
+      </View>
+      <TouchableOpacity
+        className="px-4 py-2 rounded-xl"
+        style={{ backgroundColor: "#FFC000" }}
+        onPress={() => router.push(`/product/${item.id}`)}
+      >
+        <Text style={{ color: "#000", fontSize: 10, fontWeight: "bold" }}>Details</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+}
 
-  logoContainer: {
-    marginBottom: 16,
-    alignItems: "center",
-  },
+// ─── Main Screen ───────────────────────────────────────────────────────────────
+export default function AegisHomeScreen() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [search, setSearch] = useState("");
+  const [searchDebounced, setSearchDebounced] = useState("");
 
-  logoMark: {
-    width: 44,
-    height: 44,
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
+  // Debounce search input by 400ms to avoid hammering the API on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchDebounced(search), 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  logoLeftLeg: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: 4,
-    height: 36,
-    backgroundColor: "#fff",
-    borderRadius: 2,
-    transform: [{ rotate: "20deg" }, { translateX: 8 }],
-  },
+  useEffect(() => {
+    fetchProducts();
+  }, [activeCategory, searchDebounced]);
 
-  logoRightLeg: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 4,
-    height: 36,
-    backgroundColor: "#fff",
-    borderRadius: 2,
-    transform: [{ rotate: "-20deg" }, { translateX: -8 }],
-  },
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      // Build query params — backend `discover` controller handles category="all" gracefully
+      const params = new URLSearchParams({
+        page: "1",
+        limit: "100",
+        ...(activeCategory !== "all" && { category: activeCategory }),
+        ...(searchDebounced.trim() && { search: searchDebounced.trim() }),
+      });
 
-  logoCrossbar: {
-    position: "absolute",
-    top: 18,
-    width: 20,
-    height: 3,
-    backgroundColor: "#fff",
-    borderRadius: 2,
-  },
+      const endpoint = `${API_URL}/api/farmer/products/discover?${params.toString()}`;
+      const response = await fetch(endpoint);
 
-  // ── Title ───────────────────────────────────────────────────────────────
+      if (!response.ok) {
+        console.error("[fetchProducts] Failed:", response.status, await response.text());
+        return;
+      }
 
-  title: {
-    fontSize: 30,
-    fontWeight: "700",
-    color: "#39FF14",
-    marginBottom: 24,
-    letterSpacing: 0.5,
-  },
+      const data = await response.json();
+      setProducts(data.products ?? []);
+    } catch (error) {
+      console.error("[fetchProducts] Network error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // ── Social ──────────────────────────────────────────────────────────────
+  const verifiedProducts = products.filter((p) => p.verified);
 
-  socialRow: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-    marginBottom: 20,
-  },
+  return (
+    <SafeAreaView className="flex-1 bg-black">
+      <StatusBar barStyle="light-content" backgroundColor="#000" />
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        <Header />
 
-  socialBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#181818",
-    borderWidth: 1,
-    borderColor: "#2e2e2e",
-    borderRadius: 10,
-    paddingVertical: 12,
-  },
+        {/* Search is now controlled — triggers a re-fetch via debounce */}
+        <SearchBar value={search} onChangeText={setSearch} />
 
-  socialBtnIcon: {
-    fontSize: 15,
-    color: "#fff",
-    fontWeight: "600",
-  },
+        {/* Categories */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, marginBottom: 20 }}
+        >
+          {CATEGORIES.map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              onPress={() => setActiveCategory(cat.id)}
+              style={{
+                borderWidth: 1,
+                paddingHorizontal: 20,
+                paddingVertical: 8,
+                borderRadius: 100,
+                marginRight: 8,
+                backgroundColor: activeCategory === cat.id ? "#FFC000" : "#111",
+                borderColor: activeCategory === cat.id ? "#FFC000" : "#333",
+              }}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  activeCategory === cat.id ? "text-black" : "text-white"
+                }`}
+              >
+                {cat.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-  socialBtnText: {
-    fontSize: 14,
-    color: "#e0e0e0",
-    fontWeight: "500",
-  },
+        <HeroBanner />
 
-  // ── Divider ─────────────────────────────────────────────────────────────
+        {/* Recommended — only verified products */}
+        <View className="mb-6">
+          <View className="flex-row items-center justify-between px-5 mb-4">
+            <Text className="text-white text-lg font-bold">Recommended for You</Text>
+            <TouchableOpacity>
+              <Text style={{ color: "#FFC000", fontSize: 14, fontWeight: "600" }}>See All</Text>
+            </TouchableOpacity>
+          </View>
 
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 20,
-    gap: 10,
-  },
+          {loading ? (
+            <ActivityIndicator color="#FFC000" style={{ marginVertical: 40 }} />
+          ) : verifiedProducts.length === 0 ? (
+            <Text style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", marginVertical: 24 }}>
+              No verified products found
+            </Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
+            >
+              {verifiedProducts.map((item) => (
+                <ProductCard key={item.id} item={item} />
+              ))}
+            </ScrollView>
+          )}
+        </View>
 
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#2a2a2a",
-  },
-
-  dividerText: {
-    fontSize: 13,
-    color: "#555",
-    fontWeight: "400",
-  },
-
-  // ── Fields ──────────────────────────────────────────────────────────────
-
-  fieldWrapper: {
-    width: "100%",
-    marginBottom: 14,
-  },
-
-  label: {
-    fontSize: 13,
-    color: "#c0c0c0",
-    fontWeight: "500",
-    marginBottom: 6,
-  },
-
-  inputContainer: {
-    borderWidth: 1.5,
-    borderRadius: 10,
-    backgroundColor: "#131313",
-    overflow: "hidden",
-  },
-
-  input: {
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    fontSize: 14,
-    color: "#fff",
-  },
-
-  hint: {
-    fontSize: 11,
-    color: "#555",
-    marginTop: 5,
-  },
-
-  // ── CTA ─────────────────────────────────────────────────────────────────
-
-  ctaWrapper: {
-    width: "100%",
-    marginTop: 8,
-    marginBottom: 16,
-    borderRadius: 50,
-    overflow: "hidden",
-  },
-
-  ctaBtn: {
-    borderRadius: 50,
-    overflow: "hidden",
-  },
-
-  ctaGradient: {
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 50,
-  },
-
-  ctaText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-    letterSpacing: 0.3,
-  },
-
-  // ── Login redirect ───────────────────────────────────────────────────────
-
-  loginRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  loginText: {
-    fontSize: 13,
-    color: "#666",
-  },
-
-  loginLink: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "700",
-  },
-});
+        {/* New Arrivals — all products */}
+        <View className="mb-8">
+          <Text className="text-white text-lg font-bold px-5 mb-4">New Arrivals</Text>
+          {loading ? (
+            <ActivityIndicator color="#FFC000" style={{ marginVertical: 40 }} />
+          ) : products.length === 0 ? (
+            <Text style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", marginVertical: 24 }}>
+              No products found
+            </Text>
+          ) : (
+            products.map((item) => <ArrivalCard key={item.id} item={item} />)
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
