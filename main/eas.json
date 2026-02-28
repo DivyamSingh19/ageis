@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "API_URL": "https://ageisapi.divyamm.xyz"
+        "EXPO_PUBLIC_API_URL": "https://ageisapi.divyamm.xyz"
       }
     },
     "production": {
