@@ -314,15 +314,54 @@ export class ProductController {
   };
 
   discover = async (req: Request, res: Response) => {
-    try { const products = await prisma.products.findMany({
-      include: { farmer: { select: { name: true } } },
-    });
-    return res.json({ products });
-  } catch (error) {
-    console.error("[ProductController.discover]", error);
-    return res
-      .status(HTTPStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error" });
+    try {
+      const {
+        page = "1",
+        limit = "100",
+        category,
+        search,
+      } = req.query;
+
+      const pageNum = Math.max(1, parseInt(page as string) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 20));
+      const skip = (pageNum - 1) * limitNum;
+
+      const where: any = {
+        isActive: true,
+        ...(category && category !== "all" && { category: category as string }),
+        ...(search && (search as string).trim() && {
+          OR: [
+            { name: { contains: (search as string).trim(), mode: "insensitive" } },
+            { description: { contains: (search as string).trim(), mode: "insensitive" } },
+          ],
+        }),
+      };
+
+      const [products, total] = await Promise.all([
+        prisma.products.findMany({
+          where,
+          skip,
+          take: limitNum,
+          orderBy: { createdAt: "desc" },
+          include: { farmer: { select: { name: true } } },
+        }),
+        prisma.products.count({ where }),
+      ]);
+
+      return res.status(HTTPStatus.OK).json({
+        products,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      console.error("[ProductController.discover]", error);
+      return res
+        .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
+    }
   };
-}
 }

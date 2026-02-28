@@ -45,6 +45,12 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "Allow scanning NFC tags"
+        }
       ]
     ],
     "experiments": {

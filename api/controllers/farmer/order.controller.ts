@@ -1,9 +1,9 @@
 import prisma from "../../db/prisma";
-import { Request,Response } from "express"
+import { Request, Response } from "express"
 import { HTTPStatus } from "../../services/http/status";
 
-export class OrderController{
-    get = async (req:Request,res:Response) => {
+export class OrderController {
+    get = async (req: Request, res: Response) => {
         try {
             const farmerId = req.farmerId;
             if (!farmerId) {
@@ -17,9 +17,9 @@ export class OrderController{
                 where: { farmerId },
                 include: {
                     product: true,
-                    nfc:true,
-                    nft:true,
-                    delivery:true 
+                    nfc: true,
+                    nft: true,
+                    delivery: true
                 }
             });
 
@@ -35,9 +35,58 @@ export class OrderController{
             });
         }
     }
-    cancelOrder = async (req:Request,res:Response) => {
+
+    getById = async (req: Request, res: Response) => {
         try {
-            const farmerId = req.body;
+            const id = req.params.id as string;
+            const farmerId = req.farmerId;
+
+            if (!farmerId) {
+                return res.status(HTTPStatus.UNAUTHORIZED).json({
+                    success: false,
+                    message: "Farmer ID not found in request"
+                });
+            }
+
+            const order = await prisma.order.findUnique({
+                where: { id },
+                include: {
+                    product: true,
+                    nfc: true,
+                    nft: true,
+                    delivery: true,
+                    user: {
+                        select: {
+                            name: true,
+                            email: true,
+                            profile: true
+                        }
+                    }
+                }
+            });
+
+            if (!order || order.farmerId !== farmerId) {
+                return res.status(HTTPStatus.NOT_FOUND).json({
+                    success: false,
+                    message: "Order not found"
+                });
+            }
+
+            return res.status(HTTPStatus.OK).json({
+                success: true,
+                data: order
+            });
+        } catch (error) {
+            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Failed to fetch order",
+                error: (error as Error).message
+            });
+        }
+    }
+    cancelOrder = async (req: Request, res: Response) => {
+        try {
+            const farmerId = req.farmerId;
             if (!farmerId) {
                 return res.status(HTTPStatus.UNAUTHORIZED).json({
                     success: false,
@@ -57,7 +106,7 @@ export class OrderController{
                 where: { id: orderId }
             });
 
-            if (!order) {
+            if (!order || order.farmerId !== farmerId) {
                 return res.status(HTTPStatus.NOT_FOUND).json({
                     success: false,
                     message: "Order not found"
@@ -66,7 +115,7 @@ export class OrderController{
 
             const updatedOrder = await prisma.order.update({
                 where: { id: orderId },
-                data: { status: "CANCELED"}
+                data: { status: "CANCELED" }
             });
 
             return res.status(HTTPStatus.OK).json({

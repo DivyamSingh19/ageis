@@ -6,6 +6,7 @@ const orderRouter = Router();
 const controller = new OrderController();
 
 orderRouter.get("/", farmerAuth, controller.get);
+orderRouter.get("/:id", farmerAuth, controller.getById);
 orderRouter.post("/cancel", farmerAuth, controller.cancelOrder);
 
 export default orderRouter;

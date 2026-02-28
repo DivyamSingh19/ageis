@@ -207,7 +207,7 @@ export default function AegisHomeScreen() {
         ...(searchDebounced.trim() && { search: searchDebounced.trim() }),
       });
 
-      const endpoint = `${API_URL}/api/farmer/products/discover?${params.toString()}`;
+      const endpoint = `${API_URL}/api/user/products?${params.toString()}`;
       const response = await fetch(endpoint);
 
       if (!response.ok) {

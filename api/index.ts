@@ -17,6 +17,7 @@ import prisma from "./db/prisma"
 import farmerProfileRouter from "./routes/farmer/profile"
 import farmerOrderRouter from "./routes/farmer/order"
 import deliveryRouter from "./routes/farmer/delivery"
+import { router as farmerNFCRouter } from "./routes/farmer/nfc"
 
 
 const app = express()
@@ -59,6 +60,7 @@ app.use("/api/farmer-profile", farmerProfileRouter)
 app.use("/api/farmer/products", productRouter)
 app.use("/api/farmer/orders", farmerOrderRouter)
 app.use("/api/farmer/delivery", deliveryRouter)
+app.use("/api/farmer/nfc", farmerNFCRouter)
 //gemini verification route
 app.use("/api/farmer", router)
 
@@ -73,7 +75,7 @@ app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
                 farmer: { select: { name: true } },
             },
         }) as any
-0
+        0
         if (!product) {
             return res.status(404).json({ message: "Product not found" })
         }
