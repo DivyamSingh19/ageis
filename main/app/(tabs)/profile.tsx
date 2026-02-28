@@ -32,7 +32,7 @@ export default function ProfileScreen() {
     try {
       // Fetch profile, keys (for wallet), and orders in parallel
       const [profileRes, keysRes, ordersRes] = await Promise.all([
-        fetch(`${API_URL}/api/user/profile`, {
+        fetch(`${API_URL}/api/user/profile?userId=${user.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
         fetch(`${API_URL}/api/user/keys/user/${user.id}`, {

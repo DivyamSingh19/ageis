@@ -10,15 +10,8 @@ export class UserProfileController {
     }
     create = async (req: Request, res: Response) => {
         try {
-            const userId = req.userId;
-            if (!userId) {
-                return res.status(HTTPStatus.UNAUTHORIZED).json({
-                    success: false,
-                    message: "User ID not found in request"
-                });
-            }
-
             const {
+                userId,
                 addressLine01,
                 addressLine02,
                 phoneNumber,
@@ -64,7 +57,7 @@ export class UserProfileController {
     }
     get = async (req: Request, res: Response) => {
         try {
-            const userId = req.userId
+            const { userId } = req.query as { userId: string }
             if (!userId) {
                 return res.status(HTTPStatus.BAD_REQUEST).json({
                     success: false,
@@ -105,12 +98,12 @@ export class UserProfileController {
     edit = async (req: Request, res: Response) => {
         try {
             const {
+                userId,
                 addressLine01,
                 addressLine02,
                 phoneNumber,
                 postalCode
             } = req.body
-            const userId = req.userId
             if (!userId) {
                 return res.status(HTTPStatus.BAD_REQUEST).json({
                     success: false,

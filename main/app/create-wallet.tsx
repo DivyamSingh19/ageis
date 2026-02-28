@@ -123,7 +123,7 @@ export default function CreateWalletScreen() {
                     disabled={status !== 'idle'}
                 >
                     <LinearGradient
-                        colors={['#39FF14', '#28cc0d']}
+                        colors={['#FFC000', '#FFD700']}
                         style={styles.ctaGradient}
                     >
                         {status !== 'idle' ? (
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         height: 90,
         backgroundColor: '#111',
         borderWidth: 2,
-        borderColor: '#39FF14',
+        borderColor: '#FFC000',
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
@@ -171,13 +171,13 @@ const styles = StyleSheet.create({
         height: 15,
         borderLeftWidth: 4,
         borderBottomWidth: 4,
-        borderColor: '#39FF14',
+        borderColor: '#FFC000',
         transform: [{ rotate: '-45deg' }, { translateY: -5 }],
     },
     title: {
         fontSize: 28,
-        fontWeight: '700',
-        color: '#fff',
+        fontWeight: '800',
+        color: '#FFC000',
         marginBottom: 16,
         textAlign: 'center',
     },
@@ -189,12 +189,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     warningBox: {
-        backgroundColor: 'rgba(57, 255, 20, 0.05)',
+        backgroundColor: 'rgba(255, 192, 0, 0.05)',
         padding: 16,
         borderRadius: 12,
         marginTop: 30,
         borderWidth: 1,
-        borderColor: 'rgba(57, 255, 20, 0.2)',
+        borderColor: 'rgba(255, 192, 0, 0.2)',
     },
     warningText: {
         fontSize: 13,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     ctaBtn: {
         marginTop: 50,
         width: '100%',
-        borderRadius: 50,
+        borderRadius: 25,
         overflow: 'hidden',
     },
     ctaDisabled: {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     ctaGradient: {
         paddingVertical: 18,
         alignItems: 'center',
-        borderRadius: 50,
+        borderRadius: 25,
     },
     ctaText: {
         fontSize: 18,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     },
     statusSubtext: {
         marginTop: 12,
-        color: '#39FF14',
+        color: '#FFC000',
         fontSize: 12,
         fontWeight: '500',
     }
