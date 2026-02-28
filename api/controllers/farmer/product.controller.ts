@@ -17,8 +17,6 @@ export class ProductController {
         farmerId
       } = req.body;
 
-
-
       if (!farmerId) {
         return res
           .status(HTTPStatus.UNAUTHORIZED)
@@ -174,7 +172,7 @@ export class ProductController {
 
   getById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.body;
+      const id = req.params.id as string;
 
       const product = await prisma.products.findUnique({
         where: { id },
@@ -202,14 +200,14 @@ export class ProductController {
 
   getNftInfo = async (req: Request, res: Response) => {
     try {
-      const { id } = req.body;
+      const id = req.params.id as string;
 
       const product = await prisma.products.findUnique({
         where: { id },
         include: {
           nft: true,
         },
-      });
+      }) as any;
 
       if (!product) {
         return res.status(HTTPStatus.NOT_FOUND).json({ message: "Product not found" });
@@ -309,6 +307,75 @@ export class ProductController {
       });
     } catch (error) {
       console.error("[ProductController.all]", error);
+      return res
+        .status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
+    }
+  };
+
+  discover = async (req: Request, res: Response) => {
+    try {
+      const {
+        page = "1",
+        limit = "100",
+        category,
+        farmLocation,
+        minPrice,
+        maxPrice,
+        verified,
+        search,
+      } = req.query;
+
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const skip = (pageNum - 1) * limitNum;
+
+      const where: any = {
+        ...(category && category !== "all" && { category: category as string }),
+        ...(farmLocation && { farmLocation: farmLocation as string }),
+        ...(verified !== undefined && { verified: verified === "true" }),
+        ...(minPrice || maxPrice
+          ? {
+            price: {
+              ...(minPrice && { gte: parseFloat(minPrice as string) }),
+              ...(maxPrice && { lte: parseFloat(maxPrice as string) }),
+            },
+          }
+          : {}),
+        ...(search && {
+          OR: [
+            { name: { contains: search as string, mode: "insensitive" } },
+            { description: { contains: search as string, mode: "insensitive" } },
+          ],
+        }),
+      };
+
+      const [products, total] = await Promise.all([
+        prisma.products.findMany({
+          where,
+          skip,
+          take: limitNum,
+          orderBy: { createdAt: "desc" },
+          include: {
+            farmer: {
+              select: { name: true },
+            },
+          },
+        }),
+        prisma.products.count({ where }),
+      ]);
+
+      return res.status(HTTPStatus.OK).json({
+        products,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      console.error("[ProductController.discover]", error);
       return res
         .status(HTTPStatus.INTERNAL_SERVER_ERROR)
         .json({ message: "Internal server error" });

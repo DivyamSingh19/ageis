@@ -9,6 +9,7 @@ import keyRouter from "./blockchain/routes/key.routes"
 import userKeyRouter from "./blockchain/routes/user.key.route"
 import { router as userProfileRouter } from "./routes/user/profile"
 import { router as userOrderRouter } from "./routes/user/order"
+import productDiscoveryRouter from "./routes/user/product"
 import router from "./routes/farmer/verify"
 import productRouter from "./routes/farmer/product"
 import { router as userNFCRouter } from "./routes/user/nfc"
@@ -64,14 +65,14 @@ app.use("/api/farmer", router)
 // public metadata endpoint for Solana NFT metadata_uri
 app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
     try {
-        const { id } = req.body
+        const { id } = req.params
 
         const product = await prisma.products.findUnique({
-            where: { id },
+            where: { id: id as string },
             include: {
                 farmer: { select: { name: true } },
             },
-        })
+        }) as any
 
         if (!product) {
             return res.status(404).json({ message: "Product not found" })
@@ -111,6 +112,7 @@ app.get("/api/metadata/products/:id", async (req: Request, res: Response) => {
 app.use("/api/user/auth", userAuthRouter)
 app.use("/api/user/keys", userKeyRouter)
 app.use("/api/user/profile", userProfileRouter)
+app.use("/api/user/products", productDiscoveryRouter)
 app.use("/api/user/order", userOrderRouter)
 app.use("/api/user/nfc", userNFCRouter)
 
