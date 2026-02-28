@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
     View,
     Text,
@@ -7,38 +7,56 @@ import {
     Platform,
     Animated,
     ScrollView,
+    ActivityIndicator,
+    Modal,
+    Dimensions,
+    StatusBar,
 } from "react-native";
 import NfcManager, { NfcTech } from "react-native-nfc-manager";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { router } from "expo-router";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface NFCRecord {
-    id: string;
-    timestamp: string;
-    rawId: string;
-    techTypes: string[];
-}
+const { width, height } = Dimensions.get("window");
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatTagId(id: string): string {
-    // tag.id is a hex string like "04a1b2c3" — insert colons every 2 chars
     return (id.match(/.{1,2}/g) ?? [id]).join(":").toUpperCase();
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function NFCScannerScreen() {
+export default function VerifyNFCScreen() {
     const [supported, setSupported] = useState<boolean | null>(null);
     const [enabled, setEnabled] = useState<boolean | null>(null);
     const [scanning, setScanning] = useState(false);
-    const [scannedTags, setScannedTags] = useState<NFCRecord[]>([]);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [orderData, setOrderData] = useState<any>(null);
+    const [showModal, setShowModal] = useState(false);
 
-    // Pulse animation for scan ring
-    const pulseAnim = new Animated.Value(1);
+    // Animations
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(50)).current;
 
     useEffect(() => {
+        // Entrance animation
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
         (async () => {
             const isSupported = await NfcManager.isSupported();
             setSupported(isSupported);
@@ -60,13 +78,13 @@ export default function NFCScannerScreen() {
         const pulse = Animated.loop(
             Animated.sequence([
                 Animated.timing(pulseAnim, {
-                    toValue: 1.3,
-                    duration: 900,
+                    toValue: 1.4,
+                    duration: 1000,
                     useNativeDriver: true,
                 }),
                 Animated.timing(pulseAnim, {
                     toValue: 1,
-                    duration: 900,
+                    duration: 1000,
                     useNativeDriver: true,
                 }),
             ])
@@ -75,29 +93,45 @@ export default function NFCScannerScreen() {
         return () => pulse.stop();
     }, [scanning]);
 
+    const verifyNFC = async (nfcId: string) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/api/user/nfc/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nfcId }),
+            });
+            const result = await response.json();
+            if (response.ok && result.success) {
+                setOrderData(result.data);
+                setShowModal(true);
+            } else {
+                setError(result.message || "Failed to verify NFC");
+            }
+        } catch (err) {
+            setError("Network error. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const startScan = useCallback(async () => {
         setError(null);
         setScanning(true);
 
         try {
-            await NfcManager.requestTechnology([NfcTech.NfcA, NfcTech.NfcB, NfcTech.NfcF, NfcTech.NfcV, NfcTech.Ndef]);
+            await NfcManager.requestTechnology([NfcTech.Ndef, NfcTech.NfcA]);
             const tag = await NfcManager.getTag();
 
             if (tag && tag.id) {
-                const record = {
-                    id: formatTagId(tag.id),
-                    timestamp: new Date().toLocaleTimeString(),
-                    rawId: tag.id,
-                    techTypes: tag.techTypes || [],
-                };
-                setScannedTags((prev) => [record, ...prev]);
+                // tag.id is usually the NFC UDID
+                await verifyNFC(tag.id);
             } else {
-                setError("Tag found but could not read ID. Try again.");
+                setError("Tag detected but no ID found.");
             }
         } catch (ex: any) {
-            const msg = ex instanceof Error ? ex.message : String(ex);
-            if (msg !== "cancelled" && msg !== "UserCancel") {
-                setError(msg || "Unknown error scanning tag.");
+            if (ex.message !== "cancelled" && ex.message !== "UserCancel") {
+                setError("Scanning failed. Please try again.");
             }
         } finally {
             await NfcManager.cancelTechnologyRequest().catch(() => { });
@@ -105,236 +139,327 @@ export default function NFCScannerScreen() {
         }
     }, []);
 
-    const stopScan = useCallback(async () => {
-        await NfcManager.cancelTechnologyRequest().catch(() => { });
-        setScanning(false);
-    }, []);
+    // ── Render Helpers ──────────────────────────────────────────────────────────
 
-    // ── Render states ──────────────────────────────────────────────────────────
-
-    if (supported === null) {
+    if (supported === false) {
         return (
             <View style={styles.center}>
-                <Text style={styles.subText}>Initialising NFC…</Text>
+                <Ionicons name="alert-circle" size={60} color="#FFC000" />
+                <Text style={styles.title}>Unsupported</Text>
+                <Text style={styles.subText}>This device doesn't support NFC.</Text>
             </View>
         );
     }
-
-    if (!supported) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.errorIcon}>📵</Text>
-                <Text style={styles.title}>NFC Not Supported</Text>
-                <Text style={styles.subText}>This device does not have NFC hardware.</Text>
-            </View>
-        );
-    }
-
-    if (enabled === false) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.errorIcon}>⚠️</Text>
-                <Text style={styles.title}>NFC Disabled</Text>
-                <Text style={styles.subText}>
-                    Please enable NFC in your device settings and restart the app.
-                </Text>
-            </View>
-        );
-    }
-
-    // ── Main UI ────────────────────────────────────────────────────────────────
 
     return (
         <View style={styles.container}>
+            <StatusBar barStyle="light-content" />
+
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>NFC Scanner</Text>
-                <Text style={styles.headerSub}>Tap a tag to read its ID</Text>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Ionicons name="chevron-down" size={28} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Verify NFC</Text>
+                <View style={{ width: 40 }} />
             </View>
 
-            {/* Scanner ring */}
-            <View style={styles.scanArea}>
-                <Animated.View
-                    style={[
-                        styles.pulseRing,
-                        scanning && { transform: [{ scale: pulseAnim }], opacity: 0.35 },
-                    ]}
-                />
-                <View style={[styles.scanRing, scanning && styles.scanRingActive]}>
-                    <Text style={styles.nfcIcon}>📡</Text>
-                    <Text style={[styles.scanLabel, scanning && styles.scanLabelActive]}>
-                        {scanning ? "Hold tag near phone…" : "Ready"}
+            <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+                <View style={styles.infoBox}>
+                    <Text style={styles.infoTitle}>Blockchain Authentication</Text>
+                    <Text style={styles.infoDesc}>Scan the physical tag on your product to verify its origin and journey on the Solana blockchain.</Text>
+                </View>
+
+                {/* Scan Animation Area */}
+                <View style={styles.scanWrapper}>
+                    <Animated.View
+                        style={[
+                            styles.pulseRing,
+                            { transform: [{ scale: pulseAnim }], opacity: scanning ? 0.3 : 0.1 }
+                        ]}
+                    />
+                    <View style={[styles.scanCircle, scanning && styles.scanCircleActive]}>
+                        {loading ? (
+                            <ActivityIndicator color="#FFC000" size="large" />
+                        ) : (
+                            <Ionicons name="scan-outline" size={60} color={scanning ? "#FFC000" : "#444"} />
+                        )}
+                    </View>
+                    <Text style={[styles.statusText, scanning && { color: "#FFC000" }]}>
+                        {loading ? "Verifying..." : scanning ? "Hold near tag..." : "Ready to scan"}
                     </Text>
                 </View>
-            </View>
 
-            {/* Button */}
-            <TouchableOpacity
-                style={[styles.button, scanning && styles.buttonStop]}
-                onPress={scanning ? stopScan : startScan}
-                activeOpacity={0.8}
+                <TouchableOpacity
+                    style={[styles.scanButton, scanning && styles.disabledButton]}
+                    onPress={startScan}
+                    disabled={scanning || loading}
+                >
+                    <Text style={styles.scanButtonText}>
+                        {scanning ? "Scanning..." : "Start Authentication"}
+                    </Text>
+                </TouchableOpacity>
+
+                {error && (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                )}
+            </Animated.View>
+
+            {/* Result Modal */}
+            <Modal
+                visible={showModal}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setShowModal(false)}
             >
-                <Text style={styles.buttonText}>{scanning ? "Cancel Scan" : "Start Scanning"}</Text>
-            </TouchableOpacity>
+                <BlurView intensity={20} style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <View style={styles.successIcon}>
+                                <Ionicons name="checkmark-circle" size={40} color="#000" />
+                            </View>
+                            <Text style={styles.modalTitle}>Verified Authentic</Text>
+                            <Text style={styles.modalSub}>Order Details Found</Text>
+                        </View>
 
-            {/* Error */}
-            {error && (
-                <View style={styles.errorBanner}>
-                    <Text style={styles.errorText}>⚠️ {error}</Text>
-                </View>
-            )}
+                        <ScrollView style={styles.modalBody}>
+                            <View style={styles.dataRow}>
+                                <Text style={styles.dataLabel}>Order ID</Text>
+                                <Text style={styles.dataValue}>#{orderData?.id.slice(0, 8)}</Text>
+                            </View>
+                            <View style={styles.dataRow}>
+                                <Text style={styles.dataLabel}>Status</Text>
+                                <Text style={[styles.dataValue, { color: "#FFC000" }]}>{orderData?.status}</Text>
+                            </View>
+                            <View style={styles.dataRow}>
+                                <Text style={styles.dataLabel}>Total Amount</Text>
+                                <Text style={styles.dataValue}>Rs {orderData?.totalAmount}</Text>
+                            </View>
+                            <View style={styles.dataRow}>
+                                <Text style={styles.dataLabel}>Quantity</Text>
+                                <Text style={styles.dataValue}>{orderData?.quantity} units</Text>
+                            </View>
+                            <View style={styles.dataRow}>
+                                <Text style={styles.dataLabel}>Created At</Text>
+                                <Text style={styles.dataValue}>{new Date(orderData?.createdAt).toLocaleDateString()}</Text>
+                            </View>
+                        </ScrollView>
 
-            {/* Results */}
-            {scannedTags.length > 0 && (
-                <View style={styles.resultsWrapper}>
-                    <View style={styles.resultsHeader}>
-                        <Text style={styles.resultsTitle}>Scanned Tags</Text>
-                        <TouchableOpacity onPress={() => setScannedTags([])}>
-                            <Text style={styles.clearText}>Clear</Text>
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowModal(false)}>
+                            <Text style={styles.closeButtonText}>Done</Text>
                         </TouchableOpacity>
                     </View>
-                    <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
-                        {scannedTags.map((tag, i) => (
-                            <View key={i} style={styles.tagCard}>
-                                <View style={styles.tagRow}>
-                                    <Text style={styles.tagLabel}>Tag ID</Text>
-                                    <Text style={styles.tagTime}>{tag.timestamp}</Text>
-                                </View>
-                                <Text style={styles.tagId} selectable>
-                                    {tag.id}
-                                </Text>
-                                {tag.techTypes.length > 0 && (
-                                    <Text style={styles.tagTech} numberOfLines={1}>
-                                        {tag.techTypes.map((t) => t.split(".").pop()).join(" · ")}
-                                    </Text>
-                                )}
-                            </View>
-                        ))}
-                    </ScrollView>
-                </View>
-            )}
+                </BlurView>
+            </Modal>
         </View>
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const BRAND = "#6C63FF";
-const BRAND_LIGHT = "#EEF0FF";
-const DANGER = "#FF6B6B";
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F8F9FE",
-        paddingTop: Platform.OS === "ios" ? 60 : 40,
-        paddingHorizontal: 20,
+        backgroundColor: "#000",
     },
     center: {
         flex: 1,
-        alignItems: "center",
+        backgroundColor: "#000",
         justifyContent: "center",
-        padding: 32,
-        backgroundColor: "#F8F9FE",
+        alignItems: "center",
+        padding: 20,
     },
-    // Header
-    header: { marginBottom: 28 },
-    headerTitle: { fontSize: 28, fontWeight: "700", color: "#1A1A2E", letterSpacing: -0.5 },
-    headerSub: { fontSize: 14, color: "#8B8FA8", marginTop: 4 },
-    // Scan area
-    scanArea: {
+    header: {
+        flexDirection: "row",
         alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 20,
+        paddingTop: Platform.OS === "ios" ? 20 : 40,
+        paddingBottom: 20,
+    },
+    headerTitle: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "bold",
+        letterSpacing: 0.5,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
         justifyContent: "center",
-        height: 200,
-        marginBottom: 24,
+        alignItems: "center",
+    },
+    content: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
+    infoBox: {
+        backgroundColor: "#111",
+        borderRadius: 20,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: "#222",
+        marginBottom: 40,
+    },
+    infoTitle: {
+        color: "#FFC000",
+        fontSize: 16,
+        fontWeight: "bold",
+        marginBottom: 8,
+    },
+    infoDesc: {
+        color: "rgba(255,255,255,0.6)",
+        fontSize: 13,
+        lineHeight: 20,
+    },
+    scanWrapper: {
+        height: 250,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 40,
     },
     pulseRing: {
         position: "absolute",
-        width: 170,
-        height: 170,
-        borderRadius: 85,
-        backgroundColor: BRAND,
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        backgroundColor: "#FFC000",
     },
-    scanRing: {
-        width: 150,
-        height: 150,
-        borderRadius: 75,
-        backgroundColor: "#fff",
-        borderWidth: 3,
-        borderColor: "#E0E3F0",
-        alignItems: "center",
+    scanCircle: {
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        backgroundColor: "#111",
         justifyContent: "center",
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 6,
-    },
-    scanRingActive: { borderColor: BRAND, backgroundColor: BRAND_LIGHT },
-    nfcIcon: { fontSize: 44, marginBottom: 6 },
-    scanLabel: { fontSize: 12, color: "#8B8FA8", fontWeight: "600" },
-    scanLabelActive: { color: BRAND },
-    // Button
-    button: {
-        backgroundColor: BRAND,
-        borderRadius: 16,
-        paddingVertical: 16,
         alignItems: "center",
-        marginBottom: 16,
-        shadowColor: BRAND,
-        shadowOpacity: 0.35,
-        shadowRadius: 12,
+        borderWidth: 2,
+        borderColor: "#333",
+    },
+    scanCircleActive: {
+        borderColor: "#FFC000",
+        backgroundColor: "#1a1a1a",
+    },
+    statusText: {
+        color: "#888",
+        fontSize: 14,
+        marginTop: 20,
+        fontWeight: "500",
+    },
+    scanButton: {
+        backgroundColor: "#FFC000",
+        height: 56,
+        borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#FFC000",
         shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
         elevation: 5,
     },
-    buttonStop: { backgroundColor: DANGER, shadowColor: DANGER },
-    buttonText: { color: "#fff", fontSize: 16, fontWeight: "700", letterSpacing: 0.3 },
-    // Error
-    errorBanner: {
-        backgroundColor: "#FFF0F0",
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 16,
-        borderLeftWidth: 4,
-        borderLeftColor: DANGER,
+    disabledButton: {
+        backgroundColor: "#333",
+        shadowOpacity: 0,
     },
-    errorText: { color: DANGER, fontSize: 13, fontWeight: "600" },
-    // Results
-    resultsWrapper: { flex: 1 },
-    resultsHeader: {
+    scanButtonText: {
+        color: "#000",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    errorContainer: {
+        marginTop: 20,
+        backgroundColor: "rgba(255,0,0,0.1)",
+        padding: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "rgba(255,0,0,0.2)",
+    },
+    errorText: {
+        color: "#ff6b6b",
+        fontSize: 13,
+        textAlign: "center",
+    },
+    title: {
+        color: "#fff",
+        fontSize: 24,
+        fontWeight: "bold",
+        marginTop: 20,
+    },
+    subText: {
+        color: "#888",
+        fontSize: 14,
+        marginTop: 10,
+        textAlign: "center",
+    },
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "flex-end",
+        backgroundColor: "rgba(0,0,0,0.8)",
+    },
+    modalContent: {
+        backgroundColor: "#111",
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        padding: 24,
+        maxHeight: height * 0.8,
+        borderTopWidth: 1,
+        borderTopColor: "#222",
+    },
+    modalHeader: {
+        alignItems: "center",
+        marginBottom: 30,
+    },
+    successIcon: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: "#FFC000",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    modalTitle: {
+        color: "#fff",
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+    modalSub: {
+        color: "#888",
+        fontSize: 14,
+        marginTop: 4,
+    },
+    modalBody: {
+        marginBottom: 20,
+    },
+    dataRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 10,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#222",
     },
-    resultsTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A2E" },
-    clearText: { fontSize: 14, color: BRAND, fontWeight: "600" },
-    resultsList: { flex: 1 },
-    tagCard: {
+    dataLabel: {
+        color: "#888",
+        fontSize: 14,
+    },
+    dataValue: {
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    closeButton: {
         backgroundColor: "#fff",
-        borderRadius: 14,
-        padding: 16,
-        marginBottom: 10,
-        shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 3,
+        height: 56,
+        borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 10,
     },
-    tagRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
-    tagLabel: { fontSize: 11, color: "#8B8FA8", fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8 },
-    tagTime: { fontSize: 11, color: "#8B8FA8" },
-    tagId: {
-        fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace",
+    closeButtonText: {
+        color: "#000",
         fontSize: 16,
-        fontWeight: "700",
-        color: "#1A1A2E",
-        letterSpacing: 1,
-        marginBottom: 4,
+        fontWeight: "bold",
     },
-    tagTech: { fontSize: 11, color: BRAND, fontWeight: "600" },
-    // Fallback states
-    errorIcon: { fontSize: 56, marginBottom: 12 },
-    title: { fontSize: 22, fontWeight: "700", color: "#1A1A2E", marginBottom: 8 },
-    subText: { fontSize: 14, color: "#8B8FA8", textAlign: "center", lineHeight: 20 },
 });

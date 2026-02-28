@@ -26,6 +26,7 @@ const CATEGORIES = [
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
 function Header() {
+  const router = useRouter();
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 }}>
       <Image
@@ -36,9 +37,17 @@ function Header() {
       <Text style={{ color: "#FFC000", fontSize: 22, fontWeight: "800", letterSpacing: 1.2, textTransform: "uppercase" }}>
         Aegis
       </Text>
-      <TouchableOpacity style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#FFC000", alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ fontSize: 18 }}>🔔</Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <TouchableOpacity
+          onPress={() => router.push("/verify-nfc")}
+          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#1a1a1a", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255, 192, 0, 0.3)" }}
+        >
+          <Text style={{ fontSize: 18 }}>🛡️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#FFC000", alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ fontSize: 18 }}>🔔</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -251,9 +260,8 @@ export default function AegisHomeScreen() {
               }}
             >
               <Text
-                className={`text-sm font-semibold ${
-                  activeCategory === cat.id ? "text-black" : "text-white"
-                }`}
+                className={`text-sm font-semibold ${activeCategory === cat.id ? "text-black" : "text-white"
+                  }`}
               >
                 {cat.label}
               </Text>

@@ -37,7 +37,7 @@ function RootLayoutContent() {
         <Stack.Screen name="(auth)/login" options={{ title: 'Login', headerShown: false }} />
         <Stack.Screen name="(auth)/register" options={{ title: 'Register', headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ title: 'Onboarding', headerShown: false }} />
-        <Stack.Screen name="verify-nfc" options={{ title: 'Verify NFC' }} />
+        <Stack.Screen name="verify-nfc" options={{ title: 'Verify NFC', presentation: 'modal' }} />
         <Stack.Screen name="transaction" options={{ title: 'Transaction' }} />
         <Stack.Screen name="wallet" options={{ title: 'Wallet' }} />
         <Stack.Screen name="create-wallet" options={{ title: 'Create Wallet' }} />
