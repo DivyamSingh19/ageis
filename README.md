@@ -1,8 +1,4 @@
-Here is your **fully formatted `README.md` in proper Markdown** — clean, technical, and focused on complexity.
 
-You can copy this directly into `README.md`.
-
----
 
 # 🛡️ Ageis
 
@@ -270,3 +266,4 @@ Ageis demonstrates:
 This project is architected as a distributed asset authentication platform — not just a marketplace.
 
 Contact me to build something great like ths : divyamm.xyz
+
